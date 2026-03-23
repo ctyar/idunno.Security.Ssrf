@@ -13,7 +13,8 @@ A .NET 8, 9 and 10 library to help mitigate Server Side Request Forgery (SSRF) v
 -->
 ## Getting Started
 
-Add the `idunno.Security.Ssrf` package to your project, and then when you create an `HttpClient` and add an instance of the handler to the message handler pipeline.
+Add the `idunno.Security.Ssrf` package to your project, and then when you create an `HttpClient` and add an instance of the handler
+to the message handler pipeline.
 
 ```c#
 using (var httpClient = new HttpClient(idunno.Security.SsrfSocketsHttpHanderFactory.Create()))   
@@ -35,6 +36,36 @@ using (var httpClient = new HttpClient(idunno.Security.SsrfSocketsHttpHanderFact
         invoker: httpClient);
 }
 ```
+
+## Manual URI and IP checking Helper Methods
+
+If you want to manually check URIs supplied by untrusted you can use the `idunno.Security.Ssrf` class.
+
+```c#
+
+if (idunno.Security.Ssrf.IsUnsafeUri(new Uri("https://bad.ssl.fail")))
+{
+    // Disallow entry of this URI into the system, or log an alert, or whatever you want to do with it.
+}
+```
+
+If you want to manually check an IP address you can use the `idunno.Security.Ssrf` class.
+```c#
+
+if (idunno.Security.Ssrf.IsUnsafeIpAddress(IPAddress.Parse("127.0.0.1")))
+{
+    // Disallow this IP address from being used in the system, or log an alert, or whatever you want to do with it.
+}
+```
+
+If you want to perform both checks you can use the `IsUnsafe` method, which will check both the URI and the resolved IP addresses.
+
+Note these checks are performed within `SsrfSocketsHttpHanderFactory.Create()` during the creation of an outgoing connection,
+so you don't need to call them yourself if you're using the handler.
+
+**DO NOT** solely rely on the `IsUnsafeUri` method for validating URIs. This would create a TOCTOU vulnerability, as the URI could be modified after validation but before use.
+Use the message handler for `HttpClient` and `ClientWebSocket` to ensure that resolved IP addresses are checked against the block list as an
+outgoing request is made..
 
 ## Key Features
 

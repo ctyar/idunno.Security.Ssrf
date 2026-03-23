@@ -6,7 +6,6 @@ using System.Net.Sockets;
 
 namespace idunno.Security;
 
-
 /// <summary>
 /// Provides helper functions for preventing Server-Side Request Forgery (SSRF) vulnerabilities by validating URIs and IP addresses against known unsafe ranges and characteristics.
 /// </summary>
@@ -127,7 +126,7 @@ public static class Ssrf
     }
 
     /// <summary>
-    /// Evaluates the given <paramref name="ipAddress"/> to determine if it is potentially unsafe for use in server-side requests, based on its address type , whether it is unspecified, loopback, multicast, link-local, site-local, unique local,
+    /// Evaluates the given <paramref name="ipAddress"/> to determine if it is potentially unsafe for use in server-side requests, based on its address type, whether it is unspecified, loopback, multicast, link-local, site-local, unique local,
     /// and whether it falls within known unsafe IP network ranges.
     /// </summary>
     /// <param name="ipAddress">The <see cref="IPAddress"/> to evaluate.</param>
@@ -141,7 +140,7 @@ public static class Ssrf
     }
 
     /// <summary>
-    /// Evaluates the given <paramref name="ipAddress"/> to determine if it is potentially unsafe for use in server-side requests, based on its address type , whether it is unspecified, loopback, multicast, link-local, site-local, unique local,
+    /// Evaluates the given <paramref name="ipAddress"/> to determine if it is potentially unsafe for use in server-side requests, based on its address type, whether it is unspecified, loopback, multicast, link-local, site-local, unique local,
     /// and whether it falls within known unsafe IP network ranges. Optional additional networks can be provided to consider as unsafe beyond the built-in defaults.
     /// </summary>
     /// <param name="ipAddress">The <see cref="IPAddress"/> to evaluate.</param>
