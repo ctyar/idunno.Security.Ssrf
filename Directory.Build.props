@@ -1,9 +1,9 @@
 ﻿<Project>
   <PropertyGroup>
-    <Product>idunno.Bluesky : AT Proto and Bluesky client libraries.</Product>
+    <Product>idunno.Security.Ssrf - Anti Server Side Request Forgery helpers</Product>
     <MaintainerEmail>github.com@idunno.org</MaintainerEmail>
 
-    <RepositoryUrl>https://github.com/blowdart/idunno.Bluesky</RepositoryUrl>
+    <RepositoryUrl>https://github.com/blowdart/idunnoSecuritySsrf</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
 

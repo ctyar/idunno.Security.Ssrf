@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="..\version.json" />
+    <AdditionalFiles Include="..\..\version.json" />
   </ItemGroup>
   
   <PropertyGroup>

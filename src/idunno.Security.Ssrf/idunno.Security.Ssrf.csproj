@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>idunno.Security</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\exclusion.dic" Link="exclusion.dic" />
+  </ItemGroup>
+  
+</Project>
