@@ -87,7 +87,8 @@ public static class Ssrf
 
 
     /// <summary>
-    /// Evaluates the given <paramref name="uri"/> to determine if it is potentially unsafe for use in server-side requests, based on its host name type, whether it is absolute, loopback, UNC, and its scheme.
+    /// Evaluates the given <paramref name="uri"/> to determine if it is potentially unsafe for use in server-side requests,
+    /// based on its host name type, whether it is absolute, loopback, UNC, and its scheme.
     /// </summary>
     /// <param name="uri">The <see cref="Uri"/> to evaluate.</param>
     /// <param name="allowHttp">Flag indicating whether http URIs will be allowed or rejected.</param>
@@ -115,7 +116,15 @@ public static class Ssrf
         {
             return false;
         }
+        else if (allowHttp && Uri.UriSchemeWs.Equals(uri.Scheme, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
         else if (Uri.UriSchemeHttps.Equals(uri.Scheme, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+        else if (Uri.UriSchemeWss.Equals(uri.Scheme, StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
