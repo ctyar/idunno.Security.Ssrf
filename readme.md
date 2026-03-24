@@ -37,6 +37,10 @@ using (var httpClient = new HttpClient(idunno.Security.SsrfSocketsHttpHanderFact
 }
 ```
 
+If the SSRF check finds an unsafe host, or a host that resolves to an unsafe address it will throw an `SsrfException`.
+Depending on where the exception it thrown, and the type of client it will end up as the `InnerException` on the
+`HttpException`, `SocketException` or `WebSocketException` thrown by the client.
+
 ## Manual URI and IP checking Helper Methods
 
 If you want to manually check URIs supplied by untrusted you can use the `idunno.Security.Ssrf` class.

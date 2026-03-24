@@ -271,12 +271,12 @@ public sealed class SsrfSocketsHttpHanderFactory
                                          where !Ssrf.IsUnsafeIpAddress(address, additionalNetworks)
                                          select address);
 
+                // Reorder the list of safe IP addresses based on the specified connection strategy.
                 if (connectionStrategy.HasFlag(ConnectionStrategy.Random))
                 {
                     safeIPAddresses = [.. safeIPAddresses.OrderBy(_ => RandomNumberGenerator.GetInt32(0, safeIPAddresses.Count))];
                 }
 
-                // Reorder the list of safe IP addresses based on the specified connection strategy.
                 if (connectionStrategy.HasFlag(ConnectionStrategy.Ipv4Preferred))
                 {
                     safeIPAddresses = [.. safeIPAddresses.OrderByDescending(a => a.AddressFamily == AddressFamily.InterNetwork)];
@@ -289,7 +289,6 @@ public sealed class SsrfSocketsHttpHanderFactory
                 if (safeIPAddresses.Count > 0)
                 {
                     // Attempt to connect to each safe IP address until a successful connection is made.
-
                     foreach (IPAddress address in safeIPAddresses)
                     {
                         Socket socket = new(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);

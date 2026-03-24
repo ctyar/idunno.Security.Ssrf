@@ -32,6 +32,6 @@
   </Folder>
   <Folder Name="/test/">
     <File Path="test/Directory.Build.props" />
-    <File Path="test/idunno.Security.SsrfTests/SsrfTests.cs" />
+    <Project Path="test/idunno.Security.SsrfTests/idunno.Security.SsrfTests.csproj" />
   </Folder>
 </Solution>

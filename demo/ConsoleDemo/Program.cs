@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Barry Dorrans. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
 
@@ -115,7 +114,7 @@ static async Task TestWithHttpClient(string uri, bool allowInsecureProtocols = t
             }
             else
             {
-                errorMessage = $"{ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
+                errorMessage = $"{ex.GetType().Name} => {ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
             }
             exceptionThrown = true;
         }
@@ -133,20 +132,8 @@ static async Task TestWithHttpClient(string uri, bool allowInsecureProtocols = t
                 }
                 else
                 {
-                    errorMessage = $"{ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
+                    errorMessage = $"{ex.GetType().Name} => {ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
                 }
-            }
-            exceptionThrown = true;
-        }
-        catch (SocketException ex)
-        {
-            if (ex.InnerException is null)
-            {
-                errorMessage = $"{ex.GetType().Name}: {ex.Message}";
-            }
-            else
-            {
-                errorMessage = $"{ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
             }
             exceptionThrown = true;
         }
@@ -158,7 +145,7 @@ static async Task TestWithHttpClient(string uri, bool allowInsecureProtocols = t
     }
     else
     {
-        Console.WriteLine($" ❌ {uri} - Error: {errorMessage}");
+        Console.WriteLine($" ❌ {uri} - {errorMessage}");
     }
 }
 
@@ -202,19 +189,7 @@ static async Task TestWithClientWebSocket(string uri, bool allowInsecureProtocol
             }
             else
             {
-                errorMessage = $"{ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
-            }
-            exceptionThrown = true;
-        }
-        catch (SocketException ex)
-        {
-            if (ex.InnerException is null)
-            {
-                errorMessage = $"{ex.GetType().Name}: {ex.Message}";
-            }
-            else
-            {
-                errorMessage = $"{ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
+                errorMessage = $"{ex.GetType().Name} => {ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
             }
             exceptionThrown = true;
         }
@@ -226,7 +201,7 @@ static async Task TestWithClientWebSocket(string uri, bool allowInsecureProtocol
             }
             else
             {
-                errorMessage = $"{ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
+                errorMessage = $"{ex.GetType().Name} => {ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
             }
             exceptionThrown = true;
         }
@@ -238,7 +213,7 @@ static async Task TestWithClientWebSocket(string uri, bool allowInsecureProtocol
     }
     else
     {
-        Console.WriteLine($" ❌ {uri} - Error: {errorMessage}");
+        Console.WriteLine($" ❌ {uri} - {errorMessage}");
     }
 }
 

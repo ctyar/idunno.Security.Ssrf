@@ -44,13 +44,17 @@ public static class Ssrf
             // IPv4 multicast https://datatracker.ietf.org/doc/html/rfc1112
             new(IPAddress.Parse("224.0.0.0"), 4),
             // IPv4 reserved https://datatracker.ietf.org/doc/html/rfc1112
-            new(IPAddress.Parse("240.0.0.0"), 4),
+            new(IPAddress.Parse("240.0.0.0"), 4)
+        ];
 
-            // IPv4 limited broadcast
-            new(IPAddress.Parse("255.255.255.255"), 1),
+    private static readonly ICollection<IPAddress> s_ipv4UnsafeAddressCollection =
+        [
+            IPAddress.Any,
+            IPAddress.Broadcast,
+            IPAddress.Loopback,
 
-            // Cloud metadata endpoint used by AWS, Azure, and Google Cloud.
-            new (IPAddress.Parse("169.254.169.254"), 1)
+            // Cloud metadata services (e.g. AWS, Azure, GCP)
+            IPAddress.Parse("169.254.169.254")
         ];
 
     private static readonly ICollection<IPNetwork> s_ipv6UnsafeRangeCollection =
@@ -97,16 +101,16 @@ public static class Ssrf
     {
         ArgumentNullException.ThrowIfNull(uri);
 
-        if (uri.HostNameType != UriHostNameType.Dns &&
-            uri.HostNameType != UriHostNameType.IPv4 &&
-            uri.HostNameType != UriHostNameType.IPv6)
+        if (!uri.IsAbsoluteUri ||
+            uri.IsLoopback ||
+            uri.IsUnc)
         {
             return true;
         }
 
-        if (!uri.IsAbsoluteUri ||
-            uri.IsLoopback ||
-            uri.IsUnc)
+        if (uri.HostNameType != UriHostNameType.Dns &&
+            uri.HostNameType != UriHostNameType.IPv4 &&
+            uri.HostNameType != UriHostNameType.IPv6)
         {
             return true;
         }
@@ -194,6 +198,12 @@ public static class Ssrf
         {
             return true;
         }
+
+        if (ipAddress.AddressFamily == AddressFamily.InterNetwork && s_ipv4UnsafeAddressCollection.Contains(ipAddress))
+        {
+            return true;
+        }
+
 
         if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
         {
