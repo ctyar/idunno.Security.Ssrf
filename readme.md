@@ -28,7 +28,7 @@ If you want to protect a `ClientWebSocket` you can pass a an instance of the han
 
 ```c#
 
-using (ClientWebSocket webSocket = new())
+using (var webSocket = new ClientWebSock())
 using (var httpClient = new HttpClient(idunno.Security.SsrfSocketsHttpHanderFactory.Create()))
 {
     await _client.ConnectAsync(

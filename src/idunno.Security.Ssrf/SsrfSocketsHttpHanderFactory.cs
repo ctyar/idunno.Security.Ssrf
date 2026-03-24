@@ -98,15 +98,15 @@ public sealed class SsrfSocketsHttpHanderFactory
     /// <see cref="SocketsHttpHandler.ConnectCallback"/>. The handler will attempt to resolve the target host to an IP address and validate that each resolved address
     /// is not considered unsafe before allowing a connection to be established.
     /// </summary>
-    /// <param name="allowHttp">Flag indicating whether http URIs will be allowed or rejected.</param>
+    /// <param name="allowInsecureProtocols">Flag indicating whether http:// and ws:// URIs will be allowed or rejected.</param>
     /// <returns>An new instance of a <see cref="SocketsHttpHandler"/> with SSRF protections.</returns>
-    public static SocketsHttpHandler Create(bool allowHttp)
+    public static SocketsHttpHandler Create(bool allowInsecureProtocols)
     {
         return Create(
             connectionStrategy: ConnectionStrategy.None,
             additionalNetworks: null,
             connectTimeout: null,
-            allowInsecureProtocols: allowHttp,
+            allowInsecureProtocols: allowInsecureProtocols,
             allowAutoRedirect: false,
             automaticDecompression: null,
             proxyUri: null,

@@ -85,7 +85,6 @@ public static class Ssrf
         return IsUnsafeUri(uri: uri, allowInsecureProtocols: false);
     }
 
-
     /// <summary>
     /// Evaluates the given <paramref name="uri"/> to determine if it is potentially unsafe for use in server-side requests,
     /// based on its host name type, whether it is absolute, loopback, UNC, and its scheme.
