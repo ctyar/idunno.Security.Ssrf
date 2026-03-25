@@ -7,5 +7,19 @@
   <ItemGroup>
     <None Include="..\..\exclusion.dic" Link="exclusion.dic" />
   </ItemGroup>
-  
+
+  <!-- Nuget package properties -->
+  <PropertyGroup>
+    <Description>A .NET library to help mitigate Server Side Request Forgery (SSRF) vulnerabilities in .NET applications that use HttpClient or ClientWebSocket.</Description>
+    <PackageTags>security;ssrf;serverssiderequestforgery;</PackageTags>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="readme.md" Pack="true" PackagePath="\" />
+    <None Include="icon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
 </Project>
