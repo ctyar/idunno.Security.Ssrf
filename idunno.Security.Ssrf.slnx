@@ -15,6 +15,7 @@
   <Folder Name="/.github/workflows/">
     <File Path=".github/workflows/actions-security-analysis.yml" />
     <File Path=".github/workflows/ci-build.yml" />
+    <File Path=".github/workflows/codeql.yml" />
   </Folder>
   <Folder Name="/demo/">
     <Project Path="demo/ConsoleDemo/ConsoleDemo.csproj">
