@@ -33,6 +33,8 @@ jobs:
       pull-requests: write
       checks: write
     steps:
+      ## Do not harden the runner in this workflow since it needs to run build and test tasks that may require network access and other permissions.
+
     - name: 'Checkout'
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
