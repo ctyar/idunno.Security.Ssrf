@@ -13,8 +13,8 @@ A .NET 8, 9 and 10 library to help mitigate Server Side Request Forgery (SSRF) v
 -->
 ## Getting Started
 
-Add the `idunno.Security.Ssrf` package to your project, and then when you create an `HttpClient` and add an instance of the handler
-to the message handler pipeline.
+Add the `idunno.Security.Ssrf` package to your project, and then when you create an `HttpClient`
+pass an instance of the handler in the constructor to add the handler to the message handler pipeline.
 
 ```c#
 using (var httpClient = new HttpClient(idunno.Security.SsrfSocketsHttpHanderFactory.Create()))   
@@ -23,7 +23,7 @@ using (var httpClient = new HttpClient(idunno.Security.SsrfSocketsHttpHanderFact
 }
 ```
 
-If you want to protect a `ClientWebSocket` you can pass a an instance of the handler in as the invoker parameter of
+If you want to protect a `ClientWebSocket` you pass a an instance of the handler in as the invoker parameter of
 `ConnectAsync(Uri uri, System.Net.Http.HttpMessageInvoker? invoker, System.Threading.CancellationToken cancellationToken);`.
 
 ```c#
@@ -40,8 +40,8 @@ using (var httpClient = new HttpClient(idunno.Security.SsrfSocketsHttpHanderFact
 If the SSRF handler finds an unsafe host, or a host that resolves to an IP unsafe address it will throw an `SsrfException`.
 
 If the SSTF handler finds an unsafe protocol, (i.e. http://, ws://) it will throw an `SsrfException`, unless
-the `allowInsecureProtocols` parameter is set to `true` when calling `SsrfSocketsHttpHanderFactory.Create()`. It will always throw
-when it encounters an non-HTTP/HTTPS/WS/WSS protocol, even if `allowInsecureProtocols` is set to `true`.
+the `allowInsecureProtocols` parameter is set to `true` when calling `SsrfSocketsHttpHanderFactory.Create()`.
+It will always throw when it encounters an non-HTTP/HTTPS/WS/WSS protocol, even if `allowInsecureProtocols` is set to `true`.
 
 If the SSRF handler finds a mixture of safe and unsafe IP addresses for a host it will throw an `SsrfException` unless the
 `failMixedResults` parameter is set to `false` when calling `SsrfSocketsHttpHanderFactory.Create()`.
@@ -60,7 +60,8 @@ If you want to manually check URIs supplied by untrusted you can use the `idunno
 
 if (idunno.Security.Ssrf.IsUnsafeUri(new Uri("https://bad.ssl.fail")))
 {
-    // Disallow entry of this URI into the system, or log an alert, or whatever you want to do with it.
+    // Disallow entry of this URI into the system,
+    // or log an alert, or whatever you want to do with it.
 }
 ```
 
@@ -69,7 +70,8 @@ If you want to manually check an IP address you can use the `idunno.Security.Ssr
 
 if (idunno.Security.Ssrf.IsUnsafeIpAddress(IPAddress.Parse("127.0.0.1")))
 {
-    // Disallow this IP address from being used in the system, or log an alert, or whatever you want to do with it.
+    // Disallow this IP address from being used in the system,
+    // or log an alert, or whatever you want to do with it.
 }
 ```
 
