@@ -37,9 +37,20 @@ using (var httpClient = new HttpClient(idunno.Security.SsrfSocketsHttpHanderFact
 }
 ```
 
-If the SSRF check finds an unsafe host, or a host that resolves to an unsafe address it will throw an `SsrfException`.
+If the SSRF handler finds an unsafe host, or a host that resolves to an IP unsafe address it will throw an `SsrfException`.
+
+If the SSTF handler finds an unsafe protocol, (i.e. http://, ws://) it will throw an `SsrfException`, unless
+the `allowInsecureProtocols` parameter is set to `true` when calling `SsrfSocketsHttpHanderFactory.Create()`. It will always throw
+when it encounters an non-HTTP/HTTPS/WS/WSS protocol, even if `allowInsecureProtocols` is set to `true`.
+
+If the SSRF handler finds a mixture of safe and unsafe IP addresses for a host it will throw an `SsrfException` unless the
+`failMixedResults` parameter is set to `false` when calling `SsrfSocketsHttpHanderFactory.Create()`.
+If `failMixedResults` is set to `false` then the handler will allow the request to proceed to any safe IP addresses, and will ignore any unsafe IP addresses.
+This is not recommended, as it could allow an attacker to bypass the SSRF protection by poisoning DNS results to include both safe and unsafe
+IP addresses, but it is provided as an option for scenarios where a host may legitimately resolve to both safe and unsafe IP addresses.
+
 Depending on where the exception it thrown, and the type of client it will end up as the `InnerException` on the
-`HttpException`, `SocketException` or `WebSocketException` thrown by the client.
+`HttpRequestException`, `SocketException` or `WebSocketException` thrown by the client.
 
 ## Manual URI and IP checking Helper Methods
 

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Net;
-using System.Text.Json.Serialization;
 
 namespace idunno.Security.SsrfTests;
 

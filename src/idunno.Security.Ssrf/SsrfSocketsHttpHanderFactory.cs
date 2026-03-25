@@ -26,6 +26,7 @@ public sealed class SsrfSocketsHttpHanderFactory
             connectionStrategy: ConnectionStrategy.None,
             additionalNetworks: null,
             connectTimeout: null,
+            failMixedResults: true,
             allowInsecureProtocols: false,
             allowAutoRedirect: false,
             automaticDecompression: null,
@@ -46,6 +47,7 @@ public sealed class SsrfSocketsHttpHanderFactory
             connectionStrategy: connectionStrategy,
             additionalNetworks: null,
             connectTimeout: null,
+            failMixedResults: true,
             allowInsecureProtocols: false,
             allowAutoRedirect: false,
             automaticDecompression: null,
@@ -65,6 +67,7 @@ public sealed class SsrfSocketsHttpHanderFactory
         return Create(
             connectionStrategy: ConnectionStrategy.None,
             additionalNetworks: null,
+            failMixedResults: true,
             allowInsecureProtocols: false,
             connectTimeout: connectTimeout,
             allowAutoRedirect: false,
@@ -86,6 +89,7 @@ public sealed class SsrfSocketsHttpHanderFactory
             connectionStrategy: ConnectionStrategy.None,
             additionalNetworks: additionalNetworks,
             connectTimeout: null,
+            failMixedResults: true,
             allowAutoRedirect: false,
             allowInsecureProtocols: false,
             automaticDecompression: null,
@@ -106,6 +110,7 @@ public sealed class SsrfSocketsHttpHanderFactory
             connectionStrategy: ConnectionStrategy.None,
             additionalNetworks: null,
             connectTimeout: null,
+            failMixedResults: true,
             allowInsecureProtocols: allowInsecureProtocols,
             allowAutoRedirect: false,
             automaticDecompression: null,
@@ -126,6 +131,7 @@ public sealed class SsrfSocketsHttpHanderFactory
         return Create(
             connectionStrategy: connectionStrategy,
             additionalNetworks: null,
+            failMixedResults: true,
             connectTimeout: connectTimeout,
             allowInsecureProtocols: false,
             allowAutoRedirect: false,
@@ -148,6 +154,7 @@ public sealed class SsrfSocketsHttpHanderFactory
             connectionStrategy: ConnectionStrategy.None,
             additionalNetworks: additionalNetworks,
             connectTimeout: connectTimeout,
+            failMixedResults: true,
             allowInsecureProtocols: false,
             allowAutoRedirect: false,
             automaticDecompression: null,
@@ -169,6 +176,7 @@ public sealed class SsrfSocketsHttpHanderFactory
             connectionStrategy: connectionStrategy,
             additionalNetworks: additionalNetworks,
             allowInsecureProtocols: false,
+            failMixedResults: true,
             connectTimeout: null,
             allowAutoRedirect: false,
             automaticDecompression: null,
@@ -192,6 +200,7 @@ public sealed class SsrfSocketsHttpHanderFactory
             additionalNetworks: additionalNetworks,
             connectTimeout: connectTimeout,
             allowInsecureProtocols: false,
+            failMixedResults: true,
             allowAutoRedirect: false,
             automaticDecompression: null,
             proxyUri: null,
@@ -207,6 +216,7 @@ public sealed class SsrfSocketsHttpHanderFactory
     /// <param name="additionalNetworks">An optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe. This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.</param>
     /// <param name="connectTimeout">The connect timeout, in seconds. Defaults to 30 seconds if not specified.</param>
     /// <param name="allowInsecureProtocols">Flag indicating whether http:// and ws:// URIs will be allowed or rejected.</param>
+    /// <param name="failMixedResults">Flag indicating whether to fail when a mixture of safe and unsafe addresses is found. Setting this to <see langword="true"/> will reject the connection if any unsafe addresses are found.</param>
     /// <param name="allowAutoRedirect">Flag indicating whether to allow auto-redirects. Setting this to <see langword="true"/> can introduce security vulnerabilities and should only be enabled if necessary.</param>
     /// <param name="automaticDecompression">The type of decompression to use for automatic decompression of HTTP content. If <see langword="null"/>, defaults to <see cref="DecompressionMethods.All"/>.</param>
     /// <param name="proxyUri">An optional proxy <see cref="Uri"/>.</param>
@@ -217,6 +227,7 @@ public sealed class SsrfSocketsHttpHanderFactory
         ICollection<IPNetwork>? additionalNetworks,
         TimeSpan? connectTimeout,
         bool allowInsecureProtocols,
+        bool failMixedResults,
         bool allowAutoRedirect,
         DecompressionMethods? automaticDecompression,
         Uri? proxyUri,
@@ -270,6 +281,11 @@ public sealed class SsrfSocketsHttpHanderFactory
                 safeIPAddresses.AddRange(from IPAddress address in addresses
                                          where !Ssrf.IsUnsafeIpAddress(address, additionalNetworks)
                                          select address);
+
+                if (failMixedResults && safeIPAddresses.Count != addresses.Length)
+                {
+                    throw new SsrfException(requestedUri, $"Connection blocked as some resolved addresses are unsafe.");
+                }
 
                 // Reorder the list of safe IP addresses based on the specified connection strategy.
                 if (connectionStrategy.HasFlag(ConnectionStrategy.Random))
