@@ -19,6 +19,8 @@
   <Folder Name="/demo/">
     <Project Path="demo/ConsoleDemo/ConsoleDemo.csproj">
       <BuildType Solution="CodeQL|*" Project="Debug" />
+      <Build Solution="CodeQL|*" Project="false" />
+      <Build Solution="Release|*" Project="false" />
     </Project>
   </Folder>
   <Folder Name="/Solution Items/">
@@ -44,6 +46,9 @@
   </Folder>
   <Folder Name="/test/">
     <File Path="test/Directory.Build.props" />
-    <Project Path="test/idunno.Security.SsrfTests/idunno.Security.SsrfTests.csproj" />
+    <Project Path="test/idunno.Security.SsrfTests/idunno.Security.SsrfTests.csproj">
+      <Build Solution="CodeQL|*" Project="false" />
+      <Build Solution="Release|*" Project="false" />
+    </Project>
   </Folder>
 </Solution>
