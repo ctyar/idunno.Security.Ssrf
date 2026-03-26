@@ -54,6 +54,29 @@ public class IsUnsafeIpAddressTests
     }
 
     [Theory]
+    [InlineData("104.18.26.120")]
+    [InlineData("104.18.27.120")]
+    [InlineData("[2620:1ec:bdf::69]")]
+    [InlineData("[2620:1ec:46::69]")]
+    public void ReturnsTrueForGoodIpAddressesIfTheyAreInTheSpecifiedAdditionalUnsafeIpNetworksAndOrIpAddresses(string ipAddressAsString)
+    {
+        Assert.True(Ssrf.IsUnsafeIpAddress(
+            ipAddress: IPAddress.Parse(ipAddressAsString),
+            additionalUnsafeNetworks:
+            [
+                IPNetwork.Parse("104.16.0.0/12"),
+                IPNetwork.Parse("2620:1ec::/36"),
+            ],
+            additionalUnsafeIpAddresses:
+            [
+                IPAddress.Parse("104.18.26.120"),
+                IPAddress.Parse("104.18.27.120"),
+                IPAddress.Parse("2620:1ec:bdf::69"),
+                IPAddress.Parse("2620:1ec:46::69"),
+            ]));
+    }
+
+    [Theory]
     [InlineData("10.0.0.1")]
     [InlineData("172.16.0.1")]
     [InlineData("192.168.0.1")]

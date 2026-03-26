@@ -93,7 +93,32 @@ outgoing request is made.
 
 * Mitigates Common SSRF vulnerabilities in .NET applications that use `HttpClient` or `ClientWebSocket`.
 * Supports both IPv4 and IPv6 addresses, including loopback, link-local, and private address ranges.
-* Allows for extra IP ranges to be added to the default block list.
+* Allows for extra IP ranges and individual addresses to be added to the default block list.
+* `SsrfOptions` class allows for configuration of the handler, for `IOptions` pattern support.
+
+## What is SSRF / Do I need this?
+
+When an application and an attacker love each other very much ...
+
+A ServerSide Request Forgery (SSRF) vulnerability occurs when an application takes a user-supplied URL and makes a request to that URL without
+properly, and continuously validating it.
+
+Imagine an application that takes a used supplied URL as input and fetches data from it. Everything works fine when the user supplies a URL like `https://example.com/data`,
+but what if the user supplies a URL like `http://localhost/admin`? If the application is running on a server that has an admin interface accessible at `http://localhost/admin`,
+then the application could potentially access sensitive information and share it with an attacker or allow them
+to perform actions on the server that they shouldn't be able to.
+
+It gets worse. If the user supplies a URL like `https://notanattacksite.com` and the URL is validated during
+data entry by resolving the IP addresses for the domain and checking against a block list, and marked as safe.
+Then later on the DNS entry for `notanattacksite.com` is changed to point to `127.0.0.1` and your application
+starts making internal requests. This is called a Time of Check / Time of Use (TOCTOU) vulnerability,
+and is a common pitfall when trying to mitigate SSRF vulnerabilities.
+
+In addition the default lists of [known bad IP networks and IP addresses](https://github.com/blowdart/idunnoSecuritySsrf/blob/main/src/idunno.Security.Ssrf/Ssrf.cs#L14) are probably longer than you think.
+
+If you are accepting user input that is used to make outgoing HTTP requests, or WebSocket connections, then you should be
+mitigating SSRF vulnerabilities in your application, and this library can help you do that.
+
 
 ## Current Build Status
 
