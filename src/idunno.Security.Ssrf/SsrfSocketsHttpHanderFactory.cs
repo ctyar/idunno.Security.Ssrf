@@ -257,6 +257,33 @@ public sealed class SsrfSocketsHttpHanderFactory
         IWebProxy? proxy,
         SslClientAuthenticationOptions? sslOptions)
     {
+        return Create(
+            connectionStrategy : connectionStrategy,
+            additionalUnsafeNetworks : additionalUnsafeNetworks,
+            connectTimeout : connectTimeout,
+            allowInsecureProtocols : allowInsecureProtocols,
+            failMixedResults : failMixedResults,
+            allowAutoRedirect : allowAutoRedirect,
+            automaticDecompression : automaticDecompression,
+            proxy: proxy,
+            sslOptions : sslOptions,
+            hostEntryResolver: null);
+    }
+
+    internal static SocketsHttpHandler Create(
+        ConnectionStrategy connectionStrategy,
+        ICollection<IPNetwork>? additionalUnsafeNetworks,
+        TimeSpan? connectTimeout,
+        bool allowInsecureProtocols,
+        bool failMixedResults,
+        bool allowAutoRedirect,
+        DecompressionMethods? automaticDecompression,
+        IWebProxy? proxy,
+        SslClientAuthenticationOptions? sslOptions,
+        Func<string, CancellationToken, Task<IPHostEntry>>? hostEntryResolver)
+    {
+        hostEntryResolver ??= Dns.GetHostEntryAsync;
+
         SocketsHttpHandler handler = new()
         {
             AllowAutoRedirect = allowAutoRedirect,
@@ -290,7 +317,7 @@ public sealed class SsrfSocketsHttpHanderFactory
                 }
                 else
                 {
-                    IPHostEntry entry = await Dns.GetHostEntryAsync(context.DnsEndPoint.Host, cancellationToken).ConfigureAwait(false);
+                    IPHostEntry entry = await hostEntryResolver(context.DnsEndPoint.Host, cancellationToken).ConfigureAwait(false);
                     addresses = entry.AddressList;
                 }
                 safeIPAddresses.AddRange(from IPAddress address in addresses

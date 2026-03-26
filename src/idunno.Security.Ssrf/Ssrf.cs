@@ -248,8 +248,6 @@ public static class Ssrf
             cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
-
-
     /// <summary>
     /// Implements simple SSRF validation on the specified <paramref name="uri"/> by checking 
     /// its protocol (HTTPS only), host name type, whether it is absolute, loopback, UNC, and its scheme, and that
@@ -273,20 +271,7 @@ public static class Ssrf
 
     }
 
-    /// <summary>
-    /// Implements simple SSRF validation on the specified <paramref name="uri"/> by checking 
-    /// its protocol (HTTPS only unless <paramref name="allowHttp"/> is <see langword="true"/>), host name type, whether it is absolute, loopback, UNC, and its scheme, and that
-    /// the host resolves to a public IP address which is not in a known unsafe range.
-    /// </summary>
-    /// <param name="uri">The <see cref="Uri"/> to validate.</param>
-    /// <param name="allowHttp">Flag indicating whether http URIs will be allowed or rejected.</param>
-    /// <param name="additionalUnsafeNetworks">Optional additional networks to consider unsafe.</param>
-    /// <param name="hostEntryResolver">A custom function to resolve host entries, allowing for dependency injection and testing.
-    /// If not provided, <see cref="Dns.GetHostEntryAsync(string, CancellationToken)"/> will be used by default.</param>
-    /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-    /// <returns><see langword="true" /> if the <paramref name="uri" /> is considered safe, otherwise <see langword="false"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="uri"/> is <see langword="null"/>.</exception>
-    public static async Task<bool> IsUnsafe(
+    internal static async Task<bool> IsUnsafe(
         Uri uri,
         bool allowHttp,
         ICollection<IPNetwork>? additionalUnsafeNetworks,
