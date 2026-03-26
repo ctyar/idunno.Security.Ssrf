@@ -33,7 +33,6 @@ public class IsUnsafeIpAddressTests
             ]));
     }
 
-
     [Theory]
     [InlineData("10.0.0.1")]
     [InlineData("172.16.0.1")]
