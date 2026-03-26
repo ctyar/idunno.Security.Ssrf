@@ -148,7 +148,7 @@ public static class Ssrf
     {
         ArgumentNullException.ThrowIfNull(ipAddress);
 
-        return IsUnsafeIpAddress(ipAddress, additionalNetworks: null);
+        return IsUnsafeIpAddress(ipAddress, additionalUnsafeNetworks: null, additionalUnsafeIpAddresses: null);
     }
 
     /// <summary>
@@ -156,19 +156,28 @@ public static class Ssrf
     /// and whether it falls within known unsafe IP network ranges. Optional additional networks can be provided to consider as unsafe beyond the built-in defaults.
     /// </summary>
     /// <param name="ipAddress">The <see cref="IPAddress"/> to evaluate.</param>
-    /// <param name="additionalNetworks">Optional additional networks to consider unsafe.</param>
+    /// <param name="additionalUnsafeNetworks">Optional additional networks to consider unsafe.</param>
+    /// <param name="additionalUnsafeIpAddresses">Optional additional IP addresses to consider unsafe.</param>
     /// <returns><see langword="true"/> if the <paramref name="ipAddress" /> is potentially unsafe; otherwise, <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="ipAddress"/> is <see langword="null"/>.</exception>
-    public static bool IsUnsafeIpAddress(IPAddress ipAddress, ICollection<IPNetwork>? additionalNetworks)
+    public static bool IsUnsafeIpAddress(
+        IPAddress ipAddress,
+        ICollection<IPNetwork>? additionalUnsafeNetworks,
+        ICollection<IPAddress>? additionalUnsafeIpAddresses)
     {
         ArgumentNullException.ThrowIfNull(ipAddress);
 
         ICollection<IPNetwork> ipv4UnsafeNetworks = [.. s_ipv4UnsafeRangeCollection];
         ICollection<IPNetwork> ipv6UnsafeNetworks = [.. s_ipv6UnsafeRangeCollection];
 
-        if (additionalNetworks != null)
+        if (additionalUnsafeIpAddresses != null && additionalUnsafeIpAddresses.Contains(ipAddress))
         {
-            foreach (IPNetwork network in additionalNetworks)
+            return true;
+        }
+
+        if (additionalUnsafeNetworks != null)
+        {
+            foreach (IPNetwork network in additionalUnsafeNetworks)
             {
                 if (network.BaseAddress.AddressFamily == AddressFamily.InterNetwork)
                 {
@@ -244,6 +253,7 @@ public static class Ssrf
             uri: uri,
             allowHttp: false,
             additionalUnsafeNetworks: null,
+            additionalUnsafeIpAddresses: null,
             hostEntryResolver: null,
             cancellationToken: cancellationToken).ConfigureAwait(false);
     }
@@ -254,27 +264,81 @@ public static class Ssrf
     /// the host resolves to a public IP address which is not in a known unsafe range.
     /// </summary>
     /// <param name="uri">The <see cref="Uri"/> to validate.</param>
-    /// <param name="additionalNetworks">Optional additional networks to consider unsafe.</param>
+    /// <param name="additionalUnsafeNetworks">Aditional IP networks to consider unsafe.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+    /// <returns><see langword="true" /> if the <paramref name="uri" /> is considered safe, otherwise <see langword="false"/>.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="uri"/> or <paramref name="additionalUnsafeNetworks"/> is <see langword="null"/>.</exception>
+    public static async Task<bool> IsUnsafe(Uri uri, ICollection<IPNetwork> additionalUnsafeNetworks, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        ArgumentNullException.ThrowIfNull(additionalUnsafeNetworks);
+
+        return await IsUnsafe(
+            uri: uri,
+            allowHttp: false,
+            additionalUnsafeNetworks: additionalUnsafeNetworks,
+            additionalUnsafeIpAddresses: null,
+            hostEntryResolver: null,
+            cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Implements simple SSRF validation on the specified <paramref name="uri"/> by checking 
+    /// its protocol (HTTPS only), host name type, whether it is absolute, loopback, UNC, and its scheme, and that
+    /// the host resolves to a public IP address which is not in a known unsafe range.
+    /// </summary>
+    /// <param name="uri">The <see cref="Uri"/> to validate.</param>
+    /// <param name="additionalUnsafeIpAddresses">Additional IP addresses to consider unsafe.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+    /// <returns><see langword="true" /> if the <paramref name="uri" /> is considered safe, otherwise <see langword="false"/>.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="uri"/> or <paramref name="additionalUnsafeIpAddresses"/> is <see langword="null"/>.</exception>
+    public static async Task<bool> IsUnsafe(Uri uri, ICollection<IPAddress> additionalUnsafeIpAddresses, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        ArgumentNullException.ThrowIfNull(additionalUnsafeIpAddresses);
+
+        return await IsUnsafe(
+            uri: uri,
+            allowHttp: false,
+            additionalUnsafeNetworks: null,
+            additionalUnsafeIpAddresses: additionalUnsafeIpAddresses,
+            hostEntryResolver: null,
+            cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Implements simple SSRF validation on the specified <paramref name="uri"/> by checking 
+    /// its protocol (HTTPS only), host name type, whether it is absolute, loopback, UNC, and its scheme, and that
+    /// the host resolves to a public IP address which is not in a known unsafe range.
+    /// </summary>
+    /// <param name="uri">The <see cref="Uri"/> to validate.</param>
+    /// <param name="additionalUnsafeNetworks">Optional additional networks to consider unsafe.</param>
+    /// <param name="additionalUnsafeIpAddresses">Optional additional IP addresses to consider unsafe.</param>
     /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns><see langword="true" /> if the <paramref name="uri" /> is considered safe, otherwise <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="uri"/> is <see langword="null"/>.</exception>
-    public static async Task<bool> IsUnsafe(Uri uri, ICollection<IPNetwork>? additionalNetworks, CancellationToken cancellationToken = default)
+    public static async Task<bool> IsUnsafe(
+        Uri uri,
+        ICollection<IPNetwork>? additionalUnsafeNetworks,
+        ICollection<IPAddress>? additionalUnsafeIpAddresses,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(uri);
 
         return await IsUnsafe(
             uri: uri,
             allowHttp: false,
-            additionalUnsafeNetworks: additionalNetworks,
+            additionalUnsafeNetworks: additionalUnsafeNetworks,
+            additionalUnsafeIpAddresses: additionalUnsafeIpAddresses,
             hostEntryResolver: null,
             cancellationToken: cancellationToken).ConfigureAwait(false);
-
     }
 
     internal static async Task<bool> IsUnsafe(
         Uri uri,
         bool allowHttp,
         ICollection<IPNetwork>? additionalUnsafeNetworks,
+        ICollection<IPAddress>? additionalUnsafeIpAddresses,
         Func<string, CancellationToken, Task<IPHostEntry>>? hostEntryResolver = null,
         CancellationToken cancellationToken = default)
     {
@@ -291,7 +355,10 @@ public static class Ssrf
         {
             var ipAddress = IPAddress.Parse(uri.Host);
 
-            if (IsUnsafeIpAddress(ipAddress, additionalUnsafeNetworks))
+            if (IsUnsafeIpAddress(
+                ipAddress: ipAddress,
+                additionalUnsafeNetworks: additionalUnsafeNetworks,
+                additionalUnsafeIpAddresses: additionalUnsafeIpAddresses))
             {
                 return false;
             }
@@ -308,7 +375,10 @@ public static class Ssrf
                 return false;
             }
 
-            return !hostEntry.AddressList.Any(ip => IsUnsafeIpAddress(ip, additionalUnsafeNetworks));
+            return !hostEntry.AddressList.Any(ipAddress => IsUnsafeIpAddress(
+                ipAddress: ipAddress,
+                additionalUnsafeNetworks: additionalUnsafeNetworks,
+                additionalUnsafeIpAddresses: additionalUnsafeIpAddresses));
         }
     }
 }

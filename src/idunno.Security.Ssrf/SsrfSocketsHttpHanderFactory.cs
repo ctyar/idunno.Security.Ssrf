@@ -25,6 +25,7 @@ public sealed class SsrfSocketsHttpHanderFactory
         return Create(
             connectionStrategy: ConnectionStrategy.None,
             additionalUnsafeNetworks: null,
+            additionalUnsafeIpAddresses: null,
             connectTimeout: null,
             failMixedResults: true,
             allowInsecureProtocols: false,
@@ -46,6 +47,7 @@ public sealed class SsrfSocketsHttpHanderFactory
         return Create(
             connectionStrategy: connectionStrategy,
             additionalUnsafeNetworks: null,
+            additionalUnsafeIpAddresses: null,
             connectTimeout: null,
             failMixedResults: true,
             allowInsecureProtocols: false,
@@ -67,6 +69,7 @@ public sealed class SsrfSocketsHttpHanderFactory
         return Create(
             connectionStrategy: ConnectionStrategy.None,
             additionalUnsafeNetworks: null,
+            additionalUnsafeIpAddresses: null,
             failMixedResults: true,
             allowInsecureProtocols: false,
             connectTimeout: connectTimeout,
@@ -88,6 +91,7 @@ public sealed class SsrfSocketsHttpHanderFactory
         return Create(
             connectionStrategy: ConnectionStrategy.None,
             additionalUnsafeNetworks: additionalUnsafeNetworks,
+            additionalUnsafeIpAddresses: null,
             connectTimeout: null,
             failMixedResults: true,
             allowAutoRedirect: false,
@@ -109,6 +113,7 @@ public sealed class SsrfSocketsHttpHanderFactory
         return Create(
             connectionStrategy: ConnectionStrategy.None,
             additionalUnsafeNetworks: null,
+            additionalUnsafeIpAddresses: null,
             connectTimeout: null,
             failMixedResults: true,
             allowInsecureProtocols: allowInsecureProtocols,
@@ -131,6 +136,7 @@ public sealed class SsrfSocketsHttpHanderFactory
         return Create(
             connectionStrategy: connectionStrategy,
             additionalUnsafeNetworks: null,
+            additionalUnsafeIpAddresses: null,
             failMixedResults: true,
             connectTimeout: connectTimeout,
             allowInsecureProtocols: false,
@@ -153,6 +159,30 @@ public sealed class SsrfSocketsHttpHanderFactory
         return Create(
             connectionStrategy: ConnectionStrategy.None,
             additionalUnsafeNetworks: additionalUnsafeNetworks,
+            additionalUnsafeIpAddresses: null,
+            connectTimeout: connectTimeout,
+            failMixedResults: true,
+            allowInsecureProtocols: false,
+            allowAutoRedirect: false,
+            automaticDecompression: null,
+            proxy: null,
+            sslOptions: null);
+    }
+
+    /// <summary>
+    /// Builds a <see cref="SocketsHttpHandler"/> with SSRF protections implemented in the
+    /// <see cref="SocketsHttpHandler.ConnectCallback"/>. The handler will attempt to resolve the target host to an IP address and validate that each resolved address
+    /// is not considered unsafe before allowing a connection to be established.
+    /// </summary>
+    /// <param name="additionalUnsafeIpAddresses">An optional collection of additional <see cref="IPAddress"/> addresses to consider unsafe. This can be used to block additional IP addresses beyond the built-in defaults, such as internal application IP addresses or other known unsafe addresses.</param>
+    /// <param name="connectTimeout">The connect timeout, in seconds. Defaults to 30 seconds if not specified.</param>
+    /// <returns>An new instance of a <see cref="SocketsHttpHandler"/> with SSRF protections.</returns>
+    public static SocketsHttpHandler Create(ICollection<IPAddress> additionalUnsafeIpAddresses, TimeSpan connectTimeout)
+    {
+        return Create(
+            connectionStrategy: ConnectionStrategy.None,
+            additionalUnsafeNetworks: null,
+            additionalUnsafeIpAddresses: additionalUnsafeIpAddresses,
             connectTimeout: connectTimeout,
             failMixedResults: true,
             allowInsecureProtocols: false,
@@ -175,6 +205,54 @@ public sealed class SsrfSocketsHttpHanderFactory
         return Create(
             connectionStrategy: connectionStrategy,
             additionalUnsafeNetworks: additionalUnsafeNetworks,
+            additionalUnsafeIpAddresses: null,
+            allowInsecureProtocols: false,
+            failMixedResults: true,
+            connectTimeout: null,
+            allowAutoRedirect: false,
+            automaticDecompression: null,
+            proxy: null,
+            sslOptions: null);
+    }
+
+    /// <summary>
+    /// Builds a <see cref="SocketsHttpHandler"/> with SSRF protections implemented in the
+    /// <see cref="SocketsHttpHandler.ConnectCallback"/>. The handler will attempt to resolve the target host to an IP address and validate that each resolved address
+    /// is not considered unsafe before allowing a connection to be established.
+    /// </summary>
+    /// <param name="connectionStrategy">The strategy to use when attempting to connect to multiple resolved IP addresses for a given host.</param>
+    /// <param name="additionalUnsafeIpAddresses">An optional collection of additional <see cref="IPAddress"/> addresses to consider unsafe. This can be used to block additional IP addresses beyond the built-in defaults, such as internal application IP addresses or other known unsafe addresses.</param>
+    /// <returns>An new instance of a <see cref="SocketsHttpHandler"/> with SSRF protections.</returns>
+    public static SocketsHttpHandler Create(ConnectionStrategy connectionStrategy, ICollection<IPAddress> additionalUnsafeIpAddresses)
+    {
+        return Create(
+            connectionStrategy: connectionStrategy,
+            additionalUnsafeNetworks: null,
+            additionalUnsafeIpAddresses: additionalUnsafeIpAddresses,
+            allowInsecureProtocols: false,
+            failMixedResults: true,
+            connectTimeout: null,
+            allowAutoRedirect: false,
+            automaticDecompression: null,
+            proxy: null,
+            sslOptions: null);
+    }
+
+    /// <summary>
+    /// Builds a <see cref="SocketsHttpHandler"/> with SSRF protections implemented in the
+    /// <see cref="SocketsHttpHandler.ConnectCallback"/>. The handler will attempt to resolve the target host to an IP address and validate that each resolved address
+    /// is not considered unsafe before allowing a connection to be established.
+    /// </summary>
+    /// <param name="connectionStrategy">The strategy to use when attempting to connect to multiple resolved IP addresses for a given host.</param>
+    /// <param name="additionalUnsafeNetworks">An optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe. This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.</param>
+    /// <param name="additionalUnsafeIpAddresses">An optional collection of additional <see cref="IPAddress"/> addresses to consider unsafe. This can be used to block additional IP addresses beyond the built-in defaults, such as internal application IP addresses or other known unsafe addresses.</param>
+    /// <returns>An new instance of a <see cref="SocketsHttpHandler"/> with SSRF protections.</returns>
+    public static SocketsHttpHandler Create(ConnectionStrategy connectionStrategy, ICollection<IPNetwork> additionalUnsafeNetworks, ICollection<IPAddress> additionalUnsafeIpAddresses)
+    {
+        return Create(
+            connectionStrategy: connectionStrategy,
+            additionalUnsafeNetworks: additionalUnsafeNetworks,
+            additionalUnsafeIpAddresses: additionalUnsafeIpAddresses,
             allowInsecureProtocols: false,
             failMixedResults: true,
             connectTimeout: null,
@@ -198,6 +276,7 @@ public sealed class SsrfSocketsHttpHanderFactory
         return Create(
             connectionStrategy: connectionStrategy,
             additionalUnsafeNetworks: additionalUnsafeNetworks,
+            additionalUnsafeIpAddresses: null,
             connectTimeout: connectTimeout,
             allowInsecureProtocols: false,
             failMixedResults: true,
@@ -222,9 +301,10 @@ public sealed class SsrfSocketsHttpHanderFactory
         return Create(
             connectionStrategy: options.ConnectionStrategy,
             additionalUnsafeNetworks: options.AdditionalUnsafeNetworks,
+            additionalUnsafeIpAddresses: options.AdditionalUnsafeIpAddresses,
             connectTimeout: options.ConnectTimeout,
-            failMixedResults: options.FailMixedResults,
             allowInsecureProtocols: options.AllowInsecureProtocols,
+            failMixedResults: options.FailMixedResults,
             allowAutoRedirect: options.AllowAutoRedirect,
             automaticDecompression: options.AutomaticDecompression,
             proxy: options.Proxy,
@@ -238,6 +318,7 @@ public sealed class SsrfSocketsHttpHanderFactory
     /// </summary>
     /// <param name="connectionStrategy">The strategy to use when attempting to connect to multiple resolved IP addresses for a given host.</param>
     /// <param name="additionalUnsafeNetworks">An optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe. This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.</param>
+    /// <param name="additionalUnsafeIpAddresses">An optional collection of additional <see cref="IPAddress"/> addresses to consider unsafe. This can be used to block additional IP addresses beyond the built-in defaults, such as internal application IP addresses or other known unsafe addresses.</param>
     /// <param name="connectTimeout">The timespan to wait before the connection establishing times out. The default value is <see cref="System.Threading.Timeout.InfiniteTimeSpan"/>.</param>
     /// <param name="allowInsecureProtocols">Flag indicating whether http:// and ws:// URIs will be allowed or rejected.</param>
     /// <param name="failMixedResults">Flag indicating whether to fail when a mixture of safe and unsafe addresses is found. Setting this to <see langword="true"/> will reject the connection if any unsafe addresses are found.</param>
@@ -249,6 +330,7 @@ public sealed class SsrfSocketsHttpHanderFactory
     public static SocketsHttpHandler Create(
         ConnectionStrategy connectionStrategy,
         ICollection<IPNetwork>? additionalUnsafeNetworks,
+        ICollection<IPAddress>? additionalUnsafeIpAddresses,
         TimeSpan? connectTimeout,
         bool allowInsecureProtocols,
         bool failMixedResults,
@@ -260,6 +342,7 @@ public sealed class SsrfSocketsHttpHanderFactory
         return Create(
             connectionStrategy : connectionStrategy,
             additionalUnsafeNetworks : additionalUnsafeNetworks,
+            additionalUnsafeIpAddresses : additionalUnsafeIpAddresses,
             connectTimeout : connectTimeout,
             allowInsecureProtocols : allowInsecureProtocols,
             failMixedResults : failMixedResults,
@@ -273,6 +356,7 @@ public sealed class SsrfSocketsHttpHanderFactory
     internal static SocketsHttpHandler Create(
         ConnectionStrategy connectionStrategy,
         ICollection<IPNetwork>? additionalUnsafeNetworks,
+        ICollection<IPAddress>? additionalUnsafeIpAddresses,
         TimeSpan? connectTimeout,
         bool allowInsecureProtocols,
         bool failMixedResults,
@@ -321,7 +405,7 @@ public sealed class SsrfSocketsHttpHanderFactory
                     addresses = entry.AddressList;
                 }
                 safeIPAddresses.AddRange(from IPAddress address in addresses
-                                         where !Ssrf.IsUnsafeIpAddress(address, additionalUnsafeNetworks)
+                                         where !Ssrf.IsUnsafeIpAddress(address, additionalUnsafeNetworks, additionalUnsafeIpAddresses)
                                          select address);
 
                 if (failMixedResults && safeIPAddresses.Count != addresses.Length)

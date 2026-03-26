@@ -76,6 +76,7 @@ public class HttpClientTests
         using HttpClient httpClient = new(SsrfSocketsHttpHanderFactory.Create(
             connectionStrategy: ConnectionStrategy.None,
             additionalUnsafeNetworks: null,
+            additionalUnsafeIpAddresses: null,
             connectTimeout: new TimeSpan(0,0,1),
             allowInsecureProtocols: false,
             failMixedResults: false,
@@ -152,6 +153,7 @@ public class HttpClientTests
         using HttpClient httpClient = new(SsrfSocketsHttpHanderFactory.Create(
             connectionStrategy: ConnectionStrategy.None,
             additionalUnsafeNetworks: null,
+            additionalUnsafeIpAddresses: null,
             connectTimeout: new TimeSpan(0, 0, 5),
             allowInsecureProtocols: true,
             failMixedResults: true,

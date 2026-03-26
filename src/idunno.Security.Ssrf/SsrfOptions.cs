@@ -23,6 +23,12 @@ public record SsrfOptions
     public ICollection<IPNetwork> AdditionalUnsafeNetworks { get; init; } = [];
 
     /// <summary>
+    /// Gets an optional collection of additional <see cref="IPAddress"/> addresses to consider unsafe.
+    /// This can be used to block additional IP addresses beyond the built-in defaults, such as internal application IP addresses or other known unsafe addresses.
+    /// </summary>
+    public ICollection<IPAddress> AdditionalUnsafeIpAddresses { get; init; } = [];
+
+    /// <summary>
     /// Gets or sets the timespan to wait before the connection establishing times out. The default value is <see cref="System.Threading.Timeout.InfiniteTimeSpan"/>.
     /// </summary>
     public TimeSpan? ConnectTimeout { get; set; }

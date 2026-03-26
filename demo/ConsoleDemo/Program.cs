@@ -128,6 +128,7 @@ static async Task TestWithHttpClient(string uri, bool allowInsecureProtocols = f
         SsrfSocketsHttpHanderFactory.Create(
             connectionStrategy: ConnectionStrategy.None,
             additionalUnsafeNetworks: null,
+            additionalUnsafeIpAddresses: null,
             connectTimeout: TimeSpan.FromSeconds(3),
             allowInsecureProtocols: allowInsecureProtocols,
             failMixedResults: failMixedResults,
@@ -192,6 +193,7 @@ static async Task TestWithClientWebSocket(string uri, bool allowInsecureProtocol
     using (var invoker = new HttpClient(SsrfSocketsHttpHanderFactory.Create(
             connectionStrategy: ConnectionStrategy.None,
             additionalUnsafeNetworks: null,
+            additionalUnsafeIpAddresses: null,
             connectTimeout: TimeSpan.FromSeconds(3),
             allowInsecureProtocols: allowInsecureProtocols,
             failMixedResults: failMixedResults,
