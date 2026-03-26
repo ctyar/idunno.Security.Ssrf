@@ -17,7 +17,8 @@ Add the `idunno.Security.Ssrf` package to your project, and then when you create
 pass an instance of the handler in the constructor to add the handler to the message handler pipeline.
 
 ```c#
-using (var httpClient = new HttpClient(idunno.Security.SsrfSocketsHttpHanderFactory.Create()))   
+using (var httpClient = new HttpClient(
+    SsrfSocketsHttpHanderFactory.Create(connectTimeout: new TimeSpan(0, 0, 5))))
 {
     _ = await httpClient.GetAsync(new Uri("bad.ssl.fail")).ConfigureAwait(false);
 }
@@ -29,7 +30,8 @@ If you want to protect a `ClientWebSocket` you pass a an instance of the handler
 ```c#
 
 using (var webSocket = new ClientWebSock())
-using (var httpClient = new HttpClient(idunno.Security.SsrfSocketsHttpHanderFactory.Create()))
+using (var httpClient = new HttpClient(
+    SsrfSocketsHttpHanderFactory.Create(connectTimeout: new TimeSpan(0, 0, 5))))
 {
     await _client.ConnectAsync(
         uri: "wss://echo.websocket.org",
@@ -39,15 +41,18 @@ using (var httpClient = new HttpClient(idunno.Security.SsrfSocketsHttpHanderFact
 
 If the SSRF handler finds an unsafe host, or a host that resolves to an IP unsafe address it will throw an `SsrfException`.
 
-If the SSTF handler finds an unsafe protocol, (i.e. http://, ws://) it will throw an `SsrfException`, unless
+If the SSRF handler finds an unsafe protocol, (i.e. http://, ws://) it will throw an `SsrfException`, unless
 the `allowInsecureProtocols` parameter is set to `true` when calling `SsrfSocketsHttpHanderFactory.Create()`.
 It will always throw when it encounters an non-HTTP/HTTPS/WS/WSS protocol, even if `allowInsecureProtocols` is set to `true`.
 
+Extra unsafe IP address ranges can be provided using the `additionalUnsafeNetworks` parameter.
+
 If the SSRF handler finds a mixture of safe and unsafe IP addresses for a host it will throw an `SsrfException` unless the
 `failMixedResults` parameter is set to `false` when calling `SsrfSocketsHttpHanderFactory.Create()`.
-If `failMixedResults` is set to `false` then the handler will allow the request to proceed to any safe IP addresses, and will ignore any unsafe IP addresses.
-This is not recommended, as it could allow an attacker to bypass the SSRF protection by poisoning DNS results to include both safe and unsafe
-IP addresses, but it is provided as an option for scenarios where a host may legitimately resolve to both safe and unsafe IP addresses.
+If `failMixedResults` is set to `false` then the handler will allow the request to proceed to any safe IP addresses
+discovered during DNS resolution, and will ignore any unsafe IP addresses discovered.
+This is not recommended, but it is provided as an option for scenarios where a host may legitimately
+resolve to both safe and unsafe IP addresses.
 
 Depending on where the exception it thrown, and the type of client it will end up as the `InnerException` on the
 `HttpRequestException`, `SocketException` or `WebSocketException` thrown by the client.
@@ -57,7 +62,6 @@ Depending on where the exception it thrown, and the type of client it will end u
 If you want to manually check URIs supplied by untrusted you can use the `idunno.Security.Ssrf` class.
 
 ```c#
-
 if (idunno.Security.Ssrf.IsUnsafeUri(new Uri("https://bad.ssl.fail")))
 {
     // Disallow entry of this URI into the system,
@@ -66,8 +70,8 @@ if (idunno.Security.Ssrf.IsUnsafeUri(new Uri("https://bad.ssl.fail")))
 ```
 
 If you want to manually check an IP address you can use the `idunno.Security.Ssrf` class.
-```c#
 
+```c#
 if (idunno.Security.Ssrf.IsUnsafeIpAddress(IPAddress.Parse("127.0.0.1")))
 {
     // Disallow this IP address from being used in the system,
@@ -80,7 +84,8 @@ If you want to perform both checks you can use the `IsUnsafe` method, which will
 Note these checks are performed within `SsrfSocketsHttpHanderFactory.Create()` during the creation of an outgoing connection,
 so you don't need to call them yourself if you're using the handler.
 
-**DO NOT** solely rely on the `IsUnsafeUri` method for validating URIs. This would create a TOCTOU vulnerability, as the URI could be modified after validation but before use.
+**DO NOT** solely rely on the `IsUnsafeUri` method for validating URIs. This would create a Time of Check /
+Time of Use (TOCTOU) vulnerability, as the DNS entry for the URI could be modified after validation but before use.
 Use the message handler for `HttpClient` and `ClientWebSocket` to ensure that resolved IP addresses are checked against the block list as an
 outgoing request is made.
 

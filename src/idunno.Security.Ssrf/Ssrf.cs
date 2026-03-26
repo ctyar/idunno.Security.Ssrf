@@ -243,7 +243,7 @@ public static class Ssrf
         return await IsUnsafe(
             uri: uri,
             allowHttp: false,
-            additionalNetworks: null,
+            additionalUnsafeNetworks: null,
             hostEntryResolver: null,
             cancellationToken: cancellationToken).ConfigureAwait(false);
     }
@@ -267,7 +267,7 @@ public static class Ssrf
         return await IsUnsafe(
             uri: uri,
             allowHttp: false,
-            additionalNetworks: additionalNetworks,
+            additionalUnsafeNetworks: additionalNetworks,
             hostEntryResolver: null,
             cancellationToken: cancellationToken).ConfigureAwait(false);
 
@@ -280,7 +280,7 @@ public static class Ssrf
     /// </summary>
     /// <param name="uri">The <see cref="Uri"/> to validate.</param>
     /// <param name="allowHttp">Flag indicating whether http URIs will be allowed or rejected.</param>
-    /// <param name="additionalNetworks">Optional additional networks to consider unsafe.</param>
+    /// <param name="additionalUnsafeNetworks">Optional additional networks to consider unsafe.</param>
     /// <param name="hostEntryResolver">A custom function to resolve host entries, allowing for dependency injection and testing.
     /// If not provided, <see cref="Dns.GetHostEntryAsync(string, CancellationToken)"/> will be used by default.</param>
     /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
@@ -289,7 +289,7 @@ public static class Ssrf
     public static async Task<bool> IsUnsafe(
         Uri uri,
         bool allowHttp,
-        ICollection<IPNetwork>? additionalNetworks,
+        ICollection<IPNetwork>? additionalUnsafeNetworks,
         Func<string, CancellationToken, Task<IPHostEntry>>? hostEntryResolver = null,
         CancellationToken cancellationToken = default)
     {
@@ -306,7 +306,7 @@ public static class Ssrf
         {
             var ipAddress = IPAddress.Parse(uri.Host);
 
-            if (IsUnsafeIpAddress(ipAddress, additionalNetworks))
+            if (IsUnsafeIpAddress(ipAddress, additionalUnsafeNetworks))
             {
                 return false;
             }
@@ -323,7 +323,7 @@ public static class Ssrf
                 return false;
             }
 
-            return !hostEntry.AddressList.Any(ip => IsUnsafeIpAddress(ip, additionalNetworks));
+            return !hostEntry.AddressList.Any(ip => IsUnsafeIpAddress(ip, additionalUnsafeNetworks));
         }
     }
 }

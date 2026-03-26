@@ -1,0 +1,61 @@
+﻿// Copyright (c) Barry Dorrans. All rights reserved.
+// Licensed under the MIT License.
+
+using System.Net;
+using System.Net.Security;
+
+namespace idunno.Security;
+
+/// <summary>
+/// Encapsulates options for the <see cref="SsrfSocketsHttpHanderFactory"/>.
+/// </summary>
+public record SsrfOptions
+{
+    /// <summary>
+    /// Gets or sets the strategy used to establish connections to resolved IP addresses for a given host.
+    /// </summary>
+    public ConnectionStrategy ConnectionStrategy { get; set; }
+
+    /// <summary>
+    /// Gets an optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe.
+    /// This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.
+    /// </summary>
+    public ICollection<IPNetwork> AdditionalUnsafeNetworks { get; init; } = [];
+
+    /// <summary>
+    /// Gets or sets the timespan to wait before the connection establishing times out. The default value is <see cref="System.Threading.Timeout.InfiniteTimeSpan"/>.
+    /// </summary>
+    public TimeSpan? ConnectTimeout { get; set; }
+
+    /// <summary>
+    /// Gets or sets a flag indicating whether http:// and ws:// URIs will be allowed or rejected.
+    /// </summary>
+    public bool AllowInsecureProtocols { get; set; }
+
+    /// <summary>
+    /// Gets or sets a flag indicating whether to fail when a mixture of safe and unsafe addresses is found.
+    /// Setting this to <see langword="false"/> will allow connections to proceed to any safe IP address discovered during
+    /// resolution, even if the full range of IP addresses resolved includes unsafe addresses.
+    /// </summary>
+    public bool FailMixedResults { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value that indicates whether the handler should follow redirection responses.
+    /// </summary>
+    public bool AllowAutoRedirect { get; set; }
+
+    /// <summary>
+    /// Gets or sets the type of decompression method used by the handler for automatic decompression of the HTTP content response.
+    /// </summary>
+    public DecompressionMethods? AutomaticDecompression { get; set; }
+
+    /// <summary>
+    /// Gets or sets the custom proxy to use.
+    /// </summary>
+    public IWebProxy? Proxy { get; set; }
+
+    /// <summary>
+    /// Gets or sets the set of options used for client TLS authentication.
+    /// </summary>
+    public SslClientAuthenticationOptions? SslOptions { get; set; }
+}

@@ -1,7 +1,7 @@
 ﻿using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 
 namespace idunno.Security;
 
@@ -24,14 +24,14 @@ public sealed class SsrfSocketsHttpHanderFactory
     {
         return Create(
             connectionStrategy: ConnectionStrategy.None,
-            additionalNetworks: null,
+            additionalUnsafeNetworks: null,
             connectTimeout: null,
             failMixedResults: true,
             allowInsecureProtocols: false,
             allowAutoRedirect: false,
             automaticDecompression: null,
-            proxyUri: null,
-            checkCertificateRevocationList: true);
+            proxy: null,
+            sslOptions: null);
     }
 
     /// <summary>
@@ -45,14 +45,14 @@ public sealed class SsrfSocketsHttpHanderFactory
     {
         return Create(
             connectionStrategy: connectionStrategy,
-            additionalNetworks: null,
+            additionalUnsafeNetworks: null,
             connectTimeout: null,
             failMixedResults: true,
             allowInsecureProtocols: false,
             allowAutoRedirect: false,
             automaticDecompression: null,
-            proxyUri: null,
-            checkCertificateRevocationList: true);
+            proxy: null,
+            sslOptions: null);
     }
 
     /// <summary>
@@ -66,14 +66,14 @@ public sealed class SsrfSocketsHttpHanderFactory
     {
         return Create(
             connectionStrategy: ConnectionStrategy.None,
-            additionalNetworks: null,
+            additionalUnsafeNetworks: null,
             failMixedResults: true,
             allowInsecureProtocols: false,
             connectTimeout: connectTimeout,
             allowAutoRedirect: false,
             automaticDecompression: null,
-            proxyUri: null,
-            checkCertificateRevocationList: true);
+            proxy: null,
+            sslOptions: null);
     }
 
     /// <summary>
@@ -81,20 +81,20 @@ public sealed class SsrfSocketsHttpHanderFactory
     /// <see cref="SocketsHttpHandler.ConnectCallback"/>. The handler will attempt to resolve the target host to an IP address and validate that each resolved address
     /// is not considered unsafe before allowing a connection to be established.
     /// </summary>
-    /// <param name="additionalNetworks">An optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe. This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.</param>
+    /// <param name="additionalUnsafeNetworks">An optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe. This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.</param>
     /// <returns>An new instance of a <see cref="SocketsHttpHandler"/> with SSRF protections.</returns>
-    public static SocketsHttpHandler Create(ICollection<IPNetwork> additionalNetworks)
+    public static SocketsHttpHandler Create(ICollection<IPNetwork> additionalUnsafeNetworks)
     {
         return Create(
             connectionStrategy: ConnectionStrategy.None,
-            additionalNetworks: additionalNetworks,
+            additionalUnsafeNetworks: additionalUnsafeNetworks,
             connectTimeout: null,
             failMixedResults: true,
             allowAutoRedirect: false,
             allowInsecureProtocols: false,
             automaticDecompression: null,
-            proxyUri: null,
-            checkCertificateRevocationList: true);
+            proxy: null,
+            sslOptions: null);
     }
 
     /// <summary>
@@ -108,14 +108,14 @@ public sealed class SsrfSocketsHttpHanderFactory
     {
         return Create(
             connectionStrategy: ConnectionStrategy.None,
-            additionalNetworks: null,
+            additionalUnsafeNetworks: null,
             connectTimeout: null,
             failMixedResults: true,
             allowInsecureProtocols: allowInsecureProtocols,
             allowAutoRedirect: false,
             automaticDecompression: null,
-            proxyUri: null,
-            checkCertificateRevocationList: true);
+            proxy: null,
+            sslOptions: null);
     }
 
     /// <summary>
@@ -124,20 +124,20 @@ public sealed class SsrfSocketsHttpHanderFactory
     /// is not considered unsafe before allowing a connection to be established.
     /// </summary>
     /// <param name="connectionStrategy">The strategy to use when attempting to connect to multiple resolved IP addresses for a given host.</param>
-    /// <param name="connectTimeout">The connect timeout, in seconds. Defaults to 30 seconds if not specified.</param>
+    /// <param name="connectTimeout">The timespan to wait before the connection establishing times out. The default value is <see cref="System.Threading.Timeout.InfiniteTimeSpan"/>.</param>
     /// <returns>An new instance of a <see cref="SocketsHttpHandler"/> with SSRF protections.</returns>
     public static SocketsHttpHandler Create(ConnectionStrategy connectionStrategy, TimeSpan connectTimeout)
     {
         return Create(
             connectionStrategy: connectionStrategy,
-            additionalNetworks: null,
+            additionalUnsafeNetworks: null,
             failMixedResults: true,
             connectTimeout: connectTimeout,
             allowInsecureProtocols: false,
             allowAutoRedirect: false,
             automaticDecompression: null,
-            proxyUri: null,
-            checkCertificateRevocationList: true);
+            proxy: null,
+            sslOptions: null);
     }
 
     /// <summary>
@@ -145,21 +145,21 @@ public sealed class SsrfSocketsHttpHanderFactory
     /// <see cref="SocketsHttpHandler.ConnectCallback"/>. The handler will attempt to resolve the target host to an IP address and validate that each resolved address
     /// is not considered unsafe before allowing a connection to be established.
     /// </summary>
-    /// <param name="additionalNetworks">An optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe. This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.</param>
+    /// <param name="additionalUnsafeNetworks">An optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe. This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.</param>
     /// <param name="connectTimeout">The connect timeout, in seconds. Defaults to 30 seconds if not specified.</param>
     /// <returns>An new instance of a <see cref="SocketsHttpHandler"/> with SSRF protections.</returns>
-    public static SocketsHttpHandler Create(ICollection<IPNetwork> additionalNetworks, TimeSpan connectTimeout)
+    public static SocketsHttpHandler Create(ICollection<IPNetwork> additionalUnsafeNetworks, TimeSpan connectTimeout)
     {
         return Create(
             connectionStrategy: ConnectionStrategy.None,
-            additionalNetworks: additionalNetworks,
+            additionalUnsafeNetworks: additionalUnsafeNetworks,
             connectTimeout: connectTimeout,
             failMixedResults: true,
             allowInsecureProtocols: false,
             allowAutoRedirect: false,
             automaticDecompression: null,
-            proxyUri: null,
-            checkCertificateRevocationList: true);
+            proxy: null,
+            sslOptions: null);
     }
 
     /// <summary>
@@ -168,20 +168,20 @@ public sealed class SsrfSocketsHttpHanderFactory
     /// is not considered unsafe before allowing a connection to be established.
     /// </summary>
     /// <param name="connectionStrategy">The strategy to use when attempting to connect to multiple resolved IP addresses for a given host.</param>
-    /// <param name="additionalNetworks">An optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe. This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.</param>
+    /// <param name="additionalUnsafeNetworks">An optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe. This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.</param>
     /// <returns>An new instance of a <see cref="SocketsHttpHandler"/> with SSRF protections.</returns>
-    public static SocketsHttpHandler Create(ConnectionStrategy connectionStrategy, ICollection<IPNetwork> additionalNetworks)
+    public static SocketsHttpHandler Create(ConnectionStrategy connectionStrategy, ICollection<IPNetwork> additionalUnsafeNetworks)
     {
         return Create(
             connectionStrategy: connectionStrategy,
-            additionalNetworks: additionalNetworks,
+            additionalUnsafeNetworks: additionalUnsafeNetworks,
             allowInsecureProtocols: false,
             failMixedResults: true,
             connectTimeout: null,
             allowAutoRedirect: false,
             automaticDecompression: null,
-            proxyUri: null,
-            checkCertificateRevocationList: true);
+            proxy: null,
+            sslOptions: null);
     }
 
     /// <summary>
@@ -190,21 +190,45 @@ public sealed class SsrfSocketsHttpHanderFactory
     /// is not considered unsafe before allowing a connection to be established.
     /// </summary>
     /// <param name="connectionStrategy">The strategy to use when attempting to connect to multiple resolved IP addresses for a given host.</param>
-    /// <param name="additionalNetworks">An optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe. This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.</param>
-    /// <param name="connectTimeout">The connect timeout, in seconds. Defaults to 30 seconds if not specified.</param>
+    /// <param name="additionalUnsafeNetworks">An optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe. This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.</param>
+    /// <param name="connectTimeout">The timespan to wait before the connection establishing times out. The default value is <see cref="System.Threading.Timeout.InfiniteTimeSpan"/>.</param>
     /// <returns>An new instance of a <see cref="SocketsHttpHandler"/> with SSRF protections.</returns>
-    public static SocketsHttpHandler Create(ConnectionStrategy connectionStrategy, ICollection<IPNetwork> additionalNetworks, TimeSpan connectTimeout)
+    public static SocketsHttpHandler Create(ConnectionStrategy connectionStrategy, ICollection<IPNetwork> additionalUnsafeNetworks, TimeSpan connectTimeout)
     {
         return Create(
             connectionStrategy: connectionStrategy,
-            additionalNetworks: additionalNetworks,
+            additionalUnsafeNetworks: additionalUnsafeNetworks,
             connectTimeout: connectTimeout,
             allowInsecureProtocols: false,
             failMixedResults: true,
             allowAutoRedirect: false,
             automaticDecompression: null,
-            proxyUri: null,
-            checkCertificateRevocationList: true);
+            proxy: null,
+            sslOptions: null);
+    }
+
+    /// <summary>
+    /// Builds a <see cref="SocketsHttpHandler"/> with SSRF protections implemented in the
+    /// <see cref="SocketsHttpHandler.ConnectCallback"/>. The handler will attempt to resolve the target host to an IP address and validate that each resolved address
+    /// is not considered unsafe before allowing a connection to be established.
+    /// </summary>
+    /// <param name="options">The <see cref="SsrfOptions"/> to use for configuring the handler.</param>
+    /// <returns>An new instance of a <see cref="SocketsHttpHandler"/> with SSRF protections.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="options"/> is <see langword="null"/>.</exception>
+    public static SocketsHttpHandler Create(SsrfOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+
+        return Create(
+            connectionStrategy: options.ConnectionStrategy,
+            additionalUnsafeNetworks: options.AdditionalUnsafeNetworks,
+            connectTimeout: options.ConnectTimeout,
+            failMixedResults: options.FailMixedResults,
+            allowInsecureProtocols: options.AllowInsecureProtocols,
+            allowAutoRedirect: options.AllowAutoRedirect,
+            automaticDecompression: options.AutomaticDecompression,
+            proxy: options.Proxy,
+            sslOptions: options.SslOptions);
     }
 
     /// <summary>
@@ -213,42 +237,33 @@ public sealed class SsrfSocketsHttpHanderFactory
     /// is not considered unsafe before allowing a connection to be established.
     /// </summary>
     /// <param name="connectionStrategy">The strategy to use when attempting to connect to multiple resolved IP addresses for a given host.</param>
-    /// <param name="additionalNetworks">An optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe. This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.</param>
-    /// <param name="connectTimeout">The connect timeout, in seconds. Defaults to 30 seconds if not specified.</param>
+    /// <param name="additionalUnsafeNetworks">An optional collection of additional <see cref="IPNetwork"/> ranges to consider unsafe. This can be used to block additional IP ranges beyond the built-in defaults, such as internal application IP ranges or other known unsafe addresses.</param>
+    /// <param name="connectTimeout">The timespan to wait before the connection establishing times out. The default value is <see cref="System.Threading.Timeout.InfiniteTimeSpan"/>.</param>
     /// <param name="allowInsecureProtocols">Flag indicating whether http:// and ws:// URIs will be allowed or rejected.</param>
     /// <param name="failMixedResults">Flag indicating whether to fail when a mixture of safe and unsafe addresses is found. Setting this to <see langword="true"/> will reject the connection if any unsafe addresses are found.</param>
     /// <param name="allowAutoRedirect">Flag indicating whether to allow auto-redirects. Setting this to <see langword="true"/> can introduce security vulnerabilities and should only be enabled if necessary.</param>
     /// <param name="automaticDecompression">The type of decompression to use for automatic decompression of HTTP content. If <see langword="null"/>, defaults to <see cref="DecompressionMethods.All"/>.</param>
-    /// <param name="proxyUri">An optional proxy <see cref="Uri"/>.</param>
-    /// <param name="checkCertificateRevocationList">Flag indicating whether to check the certificate revocation list. Setting this to <see langword="true"/> can introduce security vulnerabilities and should only be enabled if necessary.</param>
+    /// <param name="proxy">An optional custom proxy to use.</param>
+    /// <param name="sslOptions">Any <see cref="SslClientAuthenticationOptions" /> to use for client TLS authentication.</param>
     /// <returns>An new instance of a <see cref="SocketsHttpHandler"/> with SSRF protections.</returns>
     public static SocketsHttpHandler Create(
         ConnectionStrategy connectionStrategy,
-        ICollection<IPNetwork>? additionalNetworks,
+        ICollection<IPNetwork>? additionalUnsafeNetworks,
         TimeSpan? connectTimeout,
         bool allowInsecureProtocols,
         bool failMixedResults,
         bool allowAutoRedirect,
         DecompressionMethods? automaticDecompression,
-        Uri? proxyUri,
-        bool checkCertificateRevocationList)
+        IWebProxy? proxy,
+        SslClientAuthenticationOptions? sslOptions)
     {
-        connectTimeout ??= TimeSpan.FromSeconds(30);
-
         SocketsHttpHandler handler = new()
         {
             AllowAutoRedirect = allowAutoRedirect,
             AutomaticDecompression = automaticDecompression ?? DecompressionMethods.All,
-            ConnectTimeout = connectTimeout.Value,
             EnableMultipleHttp2Connections = true,
             PooledConnectionLifetime = TimeSpan.FromMinutes(5),
             PooledConnectionIdleTimeout = TimeSpan.FromMinutes(2),
-            SslOptions = new System.Net.Security.SslClientAuthenticationOptions
-            {
-                CertificateRevocationCheckMode = checkCertificateRevocationList
-                    ? X509RevocationMode.Online
-                    : X509RevocationMode.NoCheck
-            },
             UseCookies = false,
 
             ConnectCallback = async (context, cancellationToken) =>
@@ -279,7 +294,7 @@ public sealed class SsrfSocketsHttpHanderFactory
                     addresses = entry.AddressList;
                 }
                 safeIPAddresses.AddRange(from IPAddress address in addresses
-                                         where !Ssrf.IsUnsafeIpAddress(address, additionalNetworks)
+                                         where !Ssrf.IsUnsafeIpAddress(address, additionalUnsafeNetworks)
                                          select address);
 
                 if (failMixedResults && safeIPAddresses.Count != addresses.Length)
@@ -328,9 +343,19 @@ public sealed class SsrfSocketsHttpHanderFactory
             }
         };
 
-        if (proxyUri is not null)
+        if (connectTimeout is not null)
         {
-            handler.Proxy = new WebProxy(proxyUri);
+            handler.ConnectTimeout = connectTimeout.Value;
+        }
+
+        if (sslOptions is not null)
+        {
+            handler.SslOptions = sslOptions;
+        }
+
+        if (proxy is not null)
+        {
+            handler.Proxy = proxy;
             handler.UseProxy = true;
         }
 

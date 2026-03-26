@@ -15,7 +15,7 @@ public class HttpClientTests
     [InlineData("https://bad.ipv6.ssrf.fail/")]
     public async Task ConnectionThrowsForUnsafeUri(string hostName)
     {
-        using HttpClient httpClient = new(SsrfSocketsHttpHanderFactory.Create());
+        using HttpClient httpClient = new(SsrfSocketsHttpHanderFactory.Create(connectTimeout: new TimeSpan(0,0,5)));
         HttpRequestException ex = await Assert.ThrowsAsync<HttpRequestException>(async () => _ = await httpClient.GetAsync(hostName, cancellationToken: TestContext.Current.CancellationToken));
 
         Exception? innermostException = ex;
@@ -39,7 +39,7 @@ public class HttpClientTests
     [InlineData("https://mixed.ipv6.ssrf.fail/")]
     public async Task ConnectionThrowsForHostsThatReturnAMixOfSafeAndUnsafeIPAddresses(string hostName)
     {
-        using HttpClient httpClient = new(SsrfSocketsHttpHanderFactory.Create());
+        using HttpClient httpClient = new(SsrfSocketsHttpHanderFactory.Create(connectTimeout: new TimeSpan(0, 0, 5)));
         try
         {
             _ = await httpClient.GetAsync(hostName, cancellationToken: TestContext.Current.CancellationToken);
@@ -75,14 +75,14 @@ public class HttpClientTests
     {
         using HttpClient httpClient = new(SsrfSocketsHttpHanderFactory.Create(
             connectionStrategy: ConnectionStrategy.None,
-            additionalNetworks: null,
+            additionalUnsafeNetworks: null,
             connectTimeout: new TimeSpan(0,0,1),
             allowInsecureProtocols: false,
             failMixedResults: false,
             allowAutoRedirect: false,
             automaticDecompression: null,
-            proxyUri: null,
-            checkCertificateRevocationList: true));
+            proxy: null,
+            sslOptions: null));
 
         try
         {
@@ -117,7 +117,7 @@ public class HttpClientTests
     [InlineData("https://github.com/")]
     public async Task ConnectionSucceedsForSafeUri(string hostName)
     {
-        using HttpClient httpClient = new(SsrfSocketsHttpHanderFactory.Create());
+        using HttpClient httpClient = new(SsrfSocketsHttpHanderFactory.Create(connectTimeout: new TimeSpan(0, 0, 5)));
         HttpResponseMessage response = await httpClient.GetAsync(hostName, cancellationToken: TestContext.Current.CancellationToken);
         Assert.True(response.IsSuccessStatusCode);
     }
@@ -150,8 +150,15 @@ public class HttpClientTests
     public async Task ConnectionThrowsForSafeHostButUnsafeProtocolIfAllowInsecureProtocolIsTrue(string hostName)
     {
         using HttpClient httpClient = new(SsrfSocketsHttpHanderFactory.Create(
-            allowInsecureProtocols: true
-            ));
+            connectionStrategy: ConnectionStrategy.None,
+            additionalUnsafeNetworks: null,
+            connectTimeout: new TimeSpan(0, 0, 5),
+            allowInsecureProtocols: true,
+            failMixedResults: true,
+            allowAutoRedirect: false,
+            automaticDecompression: System.Net.DecompressionMethods.All,
+            proxy: null,
+            sslOptions: null));
         HttpResponseMessage response = await httpClient.GetAsync(hostName, cancellationToken: TestContext.Current.CancellationToken);
         Assert.True(response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.Redirect || response.StatusCode == System.Net.HttpStatusCode.MovedPermanently);
     }
