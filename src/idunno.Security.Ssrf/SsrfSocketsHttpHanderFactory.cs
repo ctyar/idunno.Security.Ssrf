@@ -354,6 +354,25 @@ public sealed class SsrfSocketsHttpHanderFactory
     }
 
     internal static SocketsHttpHandler Create(
+        SsrfOptions options,
+        Func<string, CancellationToken, Task<IPHostEntry>>? hostEntryResolver)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        return Create(
+            connectionStrategy: options.ConnectionStrategy,
+            additionalUnsafeNetworks: options.AdditionalUnsafeNetworks,
+            additionalUnsafeIpAddresses: options.AdditionalUnsafeIpAddresses,
+            connectTimeout: options.ConnectTimeout,
+            allowInsecureProtocols: options.AllowInsecureProtocols,
+            failMixedResults: options.FailMixedResults,
+            allowAutoRedirect: options.AllowAutoRedirect,
+            automaticDecompression: options.AutomaticDecompression,
+            proxy: options.Proxy,
+            sslOptions: options.SslOptions,
+            hostEntryResolver: hostEntryResolver);
+    }
+
+    internal static SocketsHttpHandler Create(
         ConnectionStrategy connectionStrategy,
         ICollection<IPNetwork>? additionalUnsafeNetworks,
         ICollection<IPAddress>? additionalUnsafeIpAddresses,
