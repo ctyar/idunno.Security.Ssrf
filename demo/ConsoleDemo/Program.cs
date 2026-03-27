@@ -54,10 +54,9 @@ Console.WriteLine();
 Console.WriteLine("failMixedResults = false");
 Console.WriteLine("------------------------");
 
-await TestWithHttpClient("https://good.ipv4.ssrf.fail", failMixedResults:false).ConfigureAwait(false);
-await TestWithHttpClient("https://mixed.ipv4.ssrf.fail",failMixedResults: false).ConfigureAwait(false);
+await TestWithHttpClient("https://good.ipv4.ssrf.fail", failMixedResults: false).ConfigureAwait(false);
+await TestWithHttpClient("https://mixed.ipv4.ssrf.fail", failMixedResults: false).ConfigureAwait(false);
 await TestWithHttpClient("https://bad.ipv4.ssrf.fail", failMixedResults: false).ConfigureAwait(false);
-
 
 Console.WriteLine();
 Console.WriteLine("allowInsecureProtocols = true");
@@ -66,7 +65,6 @@ Console.WriteLine("-----------------------------");
 await TestWithHttpClient("http://good.ipv4.ssrf.fail", allowInsecureProtocols: true).ConfigureAwait(false);
 await TestWithHttpClient("http://mixed.ipv4.ssrf.fail", allowInsecureProtocols: true).ConfigureAwait(false);
 await TestWithHttpClient("http://bad.ipv4.ssrf.fail", allowInsecureProtocols: true).ConfigureAwait(false);
-
 
 Console.WriteLine();
 Console.WriteLine("IPv6");
@@ -96,8 +94,8 @@ Console.WriteLine();
 Console.WriteLine("failMixedResults = false");
 Console.WriteLine("------------------------");
 
-await TestWithHttpClient("https://good.ssrf.fail", failMixedResults:false).ConfigureAwait(false);
-await TestWithHttpClient("https://mixed.ssrf.fail",failMixedResults: false).ConfigureAwait(false);
+await TestWithHttpClient("https://good.ssrf.fail", failMixedResults: false).ConfigureAwait(false);
+await TestWithHttpClient("https://mixed.ssrf.fail", failMixedResults: false).ConfigureAwait(false);
 await TestWithHttpClient("https://bad.ssrf.fail", failMixedResults: false).ConfigureAwait(false);
 
 Console.WriteLine();
@@ -130,7 +128,7 @@ static async Task TestWithHttpClient(string uri, bool allowInsecureProtocols = f
             connectionStrategy: ConnectionStrategy.None,
             additionalUnsafeNetworks: null,
             additionalUnsafeIpAddresses: null,
-            connectTimeout: TimeSpan.FromSeconds(3),
+            connectTimeout: TimeSpan.FromSeconds(1),
             allowInsecureProtocols: allowInsecureProtocols,
             failMixedResults: failMixedResults,
             allowAutoRedirect: false,
@@ -182,7 +180,7 @@ static async Task TestWithHttpClient(string uri, bool allowInsecureProtocols = f
             if (ex.InnerException is TimeoutException)
             {
             }
-            if (ex.InnerException is null)
+            else if (ex.InnerException is null)
             {
                 errorMessage = $"{ex.GetType().Name}: {ex.Message}";
                 exceptionThrown = true;
@@ -268,12 +266,26 @@ static async Task TestWithClientWebSocket(string uri, bool allowInsecureProtocol
             if (ex.InnerException is null)
             {
                 errorMessage = $"{ex.GetType().Name}: {ex.Message}";
+                exceptionThrown = true;
             }
             else
             {
-                errorMessage = $"{ex.GetType().Name} => {ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
+                Exception innerException = ex.InnerException;
+
+                while (innerException.InnerException is not null && innerException.InnerException is not SsrfException)
+                {
+                    innerException = innerException.InnerException;
+                }
+
+                errorMessage = $"{ex.GetType().Name} => {innerException.GetType().Name}: {innerException.Message}";
+
+                if (innerException is not SsrfException)
+                {
+                    exceptionThrown = true;
+                    errorMessage = $"{ex.GetType().Name} => {innerException.GetType().Name}: {innerException.Message}";
+                }
             }
-            exceptionThrown = true;
+          
         }
         catch (TaskCanceledException ex)
         {
