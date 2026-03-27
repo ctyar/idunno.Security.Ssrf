@@ -171,24 +171,6 @@ public static class Ssrf
     {
         ArgumentNullException.ThrowIfNull(ipAddress);
 
-        ICollection<IPNetwork> ipv4UnsafeNetworks = [.. s_ipv4UnsafeRangeCollection];
-        ICollection<IPNetwork> ipv6UnsafeNetworks = [.. s_ipv6UnsafeRangeCollection];
-
-        if (additionalUnsafeNetworks != null)
-        {
-            foreach (IPNetwork network in additionalUnsafeNetworks)
-            {
-                if (network.BaseAddress.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    ipv4UnsafeNetworks.Add(network);
-                }
-                else if (network.BaseAddress.AddressFamily == AddressFamily.InterNetworkV6)
-                {
-                    ipv6UnsafeNetworks.Add(network);
-                }
-            }
-        }
-
         // Normalize IPv4-mapped IPv6 addresses (e.g. ::ffff:127.0.0.1) to IPv4 before range checks.
         if (ipAddress.IsIPv4MappedToIPv6)
         {
@@ -222,7 +204,14 @@ public static class Ssrf
 
         if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
         {
-            return ipv4UnsafeNetworks.Any(network => network.Contains(ipAddress));
+            if (additionalUnsafeNetworks is not null && additionalUnsafeNetworks.Any(network =>
+                    network.BaseAddress.AddressFamily == AddressFamily.InterNetwork &&
+                    network.Contains(ipAddress)))
+            {
+                return true;
+            }
+
+            return s_ipv4UnsafeRangeCollection.Any(network => network.Contains(ipAddress));
         }
 
         if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
@@ -235,7 +224,14 @@ public static class Ssrf
                 return true;
             }
 
-            return ipv6UnsafeNetworks.Any(network => network.Contains(ipAddress));
+            if (additionalUnsafeNetworks is not null && additionalUnsafeNetworks.Any(network =>
+                    network.BaseAddress.AddressFamily == AddressFamily.InterNetworkV6 &&
+                    network.Contains(ipAddress)))
+            {
+                return true;
+            }
+
+            return s_ipv6UnsafeRangeCollection.Any(network => network.Contains(ipAddress));
         }
 
         // Unknown address family: fail closed.
