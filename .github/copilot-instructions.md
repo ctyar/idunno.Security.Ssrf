@@ -7,9 +7,9 @@
 * Never change .gitignore files unless explicitly asked to.
 * Never change global.json unless explicitly asked to.
 * Never change Directory.Build.props or Directory.Build.targets files unless explicitly asked to.
-* Never change Directory.Packages.props files unless explicitly asked to.
+* Never change Directory.Packages.props file unless explicitly asked to.
 * Never change package.json or package-lock.json files unless explicitly asked to.
-* Never change NuGet.config files unless explicitly asked to.
+* Never change NuGet.config file unless explicitly asked to.
 
 * Apply code-formatting style defined in `.editorconfig`.
 * Prefer file-scoped namespace declarations and single-line using directives.
@@ -21,6 +21,8 @@
 * When adding XML documentation to APIs, follow the guidelines at [`docs.prompt.md`](/.github/prompts/docs.prompt.md).
 * Prefer `?.` if applicable (e.g. `scope?.Dispose()`).
 * Use `ObjectDisposedException.ThrowIf` where applicable.
+
+**If you make code changes you MUST ensure there are tests for the changes.**
 
 **Any code you commit MUST compile, and new and existing tests related to the change MUST pass.**
 
@@ -43,4 +45,4 @@ If you make code changes, do not complete without checking the relevant code bui
 
 ## Running tests
 
-* To build and run tests in the repo use dotnet test command from the root of the repository.
+* To build and run tests in the repo use the `dotnet test` command from the root of the repository.
