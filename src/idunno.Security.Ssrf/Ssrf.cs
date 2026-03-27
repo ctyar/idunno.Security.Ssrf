@@ -11,7 +11,7 @@ namespace idunno.Security;
 /// </summary>
 public static class Ssrf
 {
-    private static readonly ICollection<IPNetwork> s_ipv4UnsafeRangeCollection =
+    private static readonly IPNetwork[] s_ipv4UnsafeRanges =
         [
             // IPv4 private address ranges https://datatracker.ietf.org/doc/html/rfc1918
             new(IPAddress.Parse("10.0.0.0"), 8),
@@ -47,17 +47,7 @@ public static class Ssrf
             new(IPAddress.Parse("240.0.0.0"), 4)
         ];
 
-    private static readonly ICollection<IPAddress> s_ipv4UnsafeAddressCollection =
-        [
-            IPAddress.Any,
-            IPAddress.Broadcast,
-            IPAddress.Loopback,
-
-            // Cloud metadata services (e.g. AWS, Azure, GCP)
-            IPAddress.Parse("169.254.169.254")
-        ];
-
-    private static readonly ICollection<IPNetwork> s_ipv6UnsafeRangeCollection =
+    private static readonly IPNetwork[] s_ipv6UnsafeRanges =
         [
             // IPv6 link-local https://datatracker.ietf.org/doc/html/rfc4291
             new(IPAddress.Parse("fe80::"), 10),
@@ -119,26 +109,13 @@ public static class Ssrf
             return true;
         }
 
-        if (allowInsecureProtocols && Uri.UriSchemeHttp.Equals(uri.Scheme, StringComparison.OrdinalIgnoreCase))
+        // Uri class already normalizes scheme to lower case, so we can do a simple ordinal comparison here.
+        return uri.Scheme switch
         {
-            return false;
-        }
-        else if (allowInsecureProtocols && Uri.UriSchemeWs.Equals(uri.Scheme, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-        else if (Uri.UriSchemeHttps.Equals(uri.Scheme, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-        else if (Uri.UriSchemeWss.Equals(uri.Scheme, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+            "https" or "wss" => false,
+            "http" or "ws" when allowInsecureProtocols => false,
+            _ => true
+        };
     }
 
     /// <summary>
@@ -164,6 +141,7 @@ public static class Ssrf
     /// <param name="additionalUnsafeIpAddresses">Optional additional IP addresses to consider unsafe.</param>
     /// <returns><see langword="true"/> if the <paramref name="ipAddress" /> is potentially unsafe; otherwise, <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="ipAddress"/> is <see langword="null"/>.</exception>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S3267:Loops should be simplified with \"LINQ\" expressions", Justification = "Avoids delegate allocation on hot path.")]
     public static bool IsUnsafeIpAddress(
         IPAddress ipAddress,
         ICollection<IPNetwork>? additionalUnsafeNetworks,
@@ -184,8 +162,8 @@ public static class Ssrf
             return true;
         }
 
-        // Block unspecified addresses (IPv4 0.0.0.0 and IPv6 ::).
-        if (ipAddress.Equals(IPAddress.Any) || ipAddress.Equals(IPAddress.IPv6None))
+        // Block IPv6 unspecified address (::), IPv4 0.0.0.0 is covered by the 0.0.0.0/8 range.
+        if (ipAddress.Equals(IPAddress.IPv6None))
         {
             return true;
         }
@@ -196,21 +174,29 @@ public static class Ssrf
             return true;
         }
 
-        if (ipAddress.AddressFamily == AddressFamily.InterNetwork && s_ipv4UnsafeAddressCollection.Contains(ipAddress))
-        {
-            return true;
-        }
-
         if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
         {
-            if (additionalUnsafeNetworks is not null && additionalUnsafeNetworks.Any(network =>
-                    network.BaseAddress.AddressFamily == AddressFamily.InterNetwork &&
-                    network.Contains(ipAddress)))
+            if (additionalUnsafeNetworks is not null)
             {
-                return true;
+                foreach (IPNetwork network in additionalUnsafeNetworks)
+                {
+                    if (network.BaseAddress.AddressFamily == AddressFamily.InterNetwork &&
+                        network.Contains(ipAddress))
+                    {
+                        return true;
+                    }
+                }
             }
 
-            return s_ipv4UnsafeRangeCollection.Any(network => network.Contains(ipAddress));
+            foreach (IPNetwork network in s_ipv4UnsafeRanges)
+            {
+                if (network.Contains(ipAddress))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
@@ -223,14 +209,27 @@ public static class Ssrf
                 return true;
             }
 
-            if (additionalUnsafeNetworks is not null && additionalUnsafeNetworks.Any(network =>
-                    network.BaseAddress.AddressFamily == AddressFamily.InterNetworkV6 &&
-                    network.Contains(ipAddress)))
+            if (additionalUnsafeNetworks is not null)
             {
-                return true;
+                foreach (IPNetwork network in additionalUnsafeNetworks)
+                {
+                    if (network.BaseAddress.AddressFamily == AddressFamily.InterNetworkV6 &&
+                        network.Contains(ipAddress))
+                    {
+                        return true;
+                    }
+                }
             }
 
-            return s_ipv6UnsafeRangeCollection.Any(network => network.Contains(ipAddress));
+            foreach (IPNetwork network in s_ipv6UnsafeRanges)
+            {
+                if (network.Contains(ipAddress))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // Unknown address family: fail closed.
@@ -388,6 +387,7 @@ public static class Ssrf
             cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S3267:Loops should be simplified with \"LINQ\" expressions", Justification = "Avoids delegate allocation on hot path.")]
     internal static async Task<bool> IsUnsafe(
         Uri uri,
         bool allowInsecureProtocols,
@@ -417,15 +417,23 @@ public static class Ssrf
         else
         {
             IPHostEntry? hostEntry = await hostEntryResolver(uri.Host, cancellationToken).ConfigureAwait(false);
-            if (hostEntry is null || hostEntry.AddressList is null)
+            if (hostEntry is null)
             {
                 return true;
             }
 
-            return hostEntry.AddressList.Any(ipAddress => IsUnsafeIpAddress(
-                ipAddress: ipAddress,
-                additionalUnsafeNetworks: additionalUnsafeNetworks,
-                additionalUnsafeIpAddresses: additionalUnsafeIpAddresses));
+            foreach (IPAddress ipAddress in hostEntry.AddressList)
+            {
+                if (IsUnsafeIpAddress(
+                    ipAddress: ipAddress,
+                    additionalUnsafeNetworks: additionalUnsafeNetworks,
+                    additionalUnsafeIpAddresses: additionalUnsafeIpAddresses))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

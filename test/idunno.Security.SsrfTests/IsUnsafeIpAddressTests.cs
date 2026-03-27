@@ -114,6 +114,19 @@ public class IsUnsafeIpAddressTests
     }
 
     [Fact]
+    public void ReturnsTrueForIpv4BroadcastIpAddress()
+    {
+        Assert.True(Ssrf.IsUnsafeIpAddress(IPAddress.Broadcast));
+    }
+
+    [Fact]
+    public void ReturnsTrueForIpv4AnyIpAddress()
+    {
+        Assert.True(Ssrf.IsUnsafeIpAddress(IPAddress.Any));
+    }
+
+
+    [Fact]
     public void ReturnsTrueForLoopbackIpAddresses()
     {
         Assert.True(Ssrf.IsUnsafeIpAddress(IPAddress.Loopback));
