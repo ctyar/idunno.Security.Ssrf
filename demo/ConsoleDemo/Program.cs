@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Net;
+using System.Net.Security;
 using System.Net.WebSockets;
 using System.Text;
 
@@ -135,7 +136,11 @@ static async Task TestWithHttpClient(string uri, bool allowInsecureProtocols = f
             allowAutoRedirect: false,
             automaticDecompression: DecompressionMethods.All,
             proxy: null,
-            sslOptions: null)))
+            sslOptions: new SslClientAuthenticationOptions()
+            {
+                // Ignore SSL errors since some of the test URLs have invalid certificates. Do not do this in production code.
+                RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true
+            })))
     {
         try
         {
@@ -172,6 +177,22 @@ static async Task TestWithHttpClient(string uri, bool allowInsecureProtocols = f
             }
             exceptionThrown = true;
         }
+        catch (TaskCanceledException ex)
+        {
+            if (ex.InnerException is TimeoutException)
+            {
+            }
+            if (ex.InnerException is null)
+            {
+                errorMessage = $"{ex.GetType().Name}: {ex.Message}";
+                exceptionThrown = true;
+            }
+            else
+            {
+                errorMessage = $"{ex.GetType().Name} => {ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
+                exceptionThrown = true;
+            }
+        }
     }
 
     if (!exceptionThrown)
@@ -200,7 +221,11 @@ static async Task TestWithClientWebSocket(string uri, bool allowInsecureProtocol
             allowAutoRedirect: false,
             automaticDecompression: DecompressionMethods.All,
             proxy: null,
-            sslOptions: null)))
+            sslOptions: new SslClientAuthenticationOptions()
+            {
+                // Ignore SSL errors since some of the test URLs have invalid certificates. Do not do this in production code.
+                RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true
+            })))
     {
         try
         {
@@ -249,6 +274,22 @@ static async Task TestWithClientWebSocket(string uri, bool allowInsecureProtocol
                 errorMessage = $"{ex.GetType().Name} => {ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
             }
             exceptionThrown = true;
+        }
+        catch (TaskCanceledException ex)
+        {
+            if (ex.InnerException is TimeoutException)
+            {
+            }
+            else if (ex.InnerException is null)
+            {
+                errorMessage = $"{ex.GetType().Name}: {ex.Message}";
+                exceptionThrown = true;
+            }
+            else
+            {
+                errorMessage = $"{ex.GetType().Name} => {ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
+                exceptionThrown = true;
+            }
         }
     }
 

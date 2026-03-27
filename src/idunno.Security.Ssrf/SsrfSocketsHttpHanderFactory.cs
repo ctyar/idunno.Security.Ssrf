@@ -422,8 +422,16 @@ public sealed class SsrfSocketsHttpHanderFactory
                 }
                 else
                 {
-                    IPHostEntry entry = await hostEntryResolver(context.DnsEndPoint.Host, cancellationToken).ConfigureAwait(false);
-                    addresses = entry.AddressList;
+                    try
+                    {
+                        IPHostEntry entry = await hostEntryResolver(context.DnsEndPoint.Host, cancellationToken).ConfigureAwait(false);
+                        addresses = entry.AddressList;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Some DNS proxies or internal servers may already strip dangerous lookups, so if the host cannot be resolved, we can treat it as unsafe and block the connection.
+                        throw new SsrfException(requestedUri, $"Connection blocked as host could not be resolved.", inner: ex);
+                    }
                 }
                 safeIPAddresses.AddRange(from IPAddress address in addresses
                                          where !Ssrf.IsUnsafeIpAddress(address, additionalUnsafeNetworks, additionalUnsafeIpAddresses)

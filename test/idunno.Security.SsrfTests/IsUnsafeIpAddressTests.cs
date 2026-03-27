@@ -141,6 +141,14 @@ public class IsUnsafeIpAddressTests
     }
 
     [Theory]
+    [InlineData("169.254.255.254")]
+    [InlineData("169.254.0.1")]
+    public void ReturnsTrueForIPv4LinkLocalAddresses(string ipAddressAsString)
+    {
+        Assert.True(Ssrf.IsUnsafeIpAddress(IPAddress.Parse(ipAddressAsString)));
+    }
+
+    [Theory]
     // See https://www.iana.org/assignments/ipv6-multicast-addresses/ipv6-multicast-addresses.xhtml
     // Node-Local Scope Multicast Addresses
     [InlineData("ff01:0:0:0:0:0:0:1")]
