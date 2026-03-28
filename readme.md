@@ -4,11 +4,11 @@ A .NET 8, 9 and 10 library to help mitigate Server Side Request Forgery (SSRF) v
 
 [if you want me to wear 37 pieces of flair, like your pretty boy over there, Brian, why don't you just make the minimum 37 pieces of flair?]: #
 
-[![GitHub License](https://img.shields.io/github/license/blowdart/idunnoSecuritySsrf)](https://github.com/blowdart/idunno.Security.Ssrf/blob/main/LICENSE)
-[![Last Commit](https://img.shields.io/github/last-commit/blowdart/idunnoSecuritySsrf)](https://github.com/blowdart/idunnoSecuritySsrf/commits/main/)
-<!--[![GitHub Tag](https://img.shields.io/github/v/tag/blowdart/idunnoSecuritySsrf)](https://github.com/blowdart/idunnoSecuritySsrf/tags)
-[![NuGet Version](https://img.shields.io/nuget/vpre/idunnoSecuritySsrf)](https://www.nuget.org/packages/idunno.Security.Ssrf/)
-[![NuGet Downloads](https://img.shields.io/nuget/dt/idunnoSecuritySsrf)](https://www.nuget.org/packages/idunno.Security.Ssrf/)
+[![GitHub License](https://img.shields.io/github/license/blowdart/idunno.Security.Ssrf)](https://github.com/blowdart/idunno.Security.Ssrf/blob/main/LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/blowdart/idunno.Security.Ssrf)](https://github.com/blowdart/idunno.Security.Ssrf/commits/main/)
+<!--[![GitHub Tag](https://img.shields.io/github/v/tag/blowdart/idunno.Security.Ssrf)](https://github.com/blowdart/idunno.Security.Ssrf/tags)
+[![NuGet Version](https://img.shields.io/nuget/vpre/idunno.Security.Ssrf)](https://www.nuget.org/packages/idunno.Security.Ssrf/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/idunno.Security.Ssrf)](https://www.nuget.org/packages/idunno.Security.Ssrf/)
 
 -->
 ## Getting Started

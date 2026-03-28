@@ -13,6 +13,8 @@ namespace idunno.Security;
 /// </summary>
 public sealed class SsrfSocketsHttpHanderFactory
 {
+    private static readonly Func<string, CancellationToken, Task<IPHostEntry>> s_defaultHostEntryResolver = Dns.GetHostEntryAsync;
+
     [ExcludeFromCodeCoverage]
     private SsrfSocketsHttpHanderFactory()
     {
@@ -848,7 +850,7 @@ public sealed class SsrfSocketsHttpHanderFactory
         Func<string, CancellationToken, Task<IPHostEntry>>? hostEntryResolver,
         ILoggerFactory? loggerFactory)
     {
-        hostEntryResolver ??= Dns.GetHostEntryAsync;
+        hostEntryResolver ??= s_defaultHostEntryResolver;
         loggerFactory ??= NullLoggerFactory.Instance;
         ILogger logger = loggerFactory.CreateLogger<SsrfSocketsHttpHanderFactory>();
 
@@ -870,7 +872,6 @@ public sealed class SsrfSocketsHttpHanderFactory
                 // vulnerability where an attacker could change the resolved IP address after validation but before connection.
 
                 IPAddress[] resolvedIpAddresses = [];
-                List<IPAddress> safeResolvedIPAddresses = [];
 
                 Uri requestedUri = context.InitialRequestMessage.RequestUri ?? throw new InvalidOperationException("The request message must have a RequestUri.");
 
@@ -911,9 +912,20 @@ public sealed class SsrfSocketsHttpHanderFactory
                 }
 
                 // Pare down the list of resolved IP addresses to just the safe addresses by applying the built-in and additional unsafe IP and network rules.
-                safeResolvedIPAddresses.AddRange(from IPAddress address in resolvedIpAddresses
-                                                 where !Ssrf.IsUnsafeIpAddress(address, additionalUnsafeNetworks, additionalUnsafeIpAddresses)
-                                                 select address);
+
+                // Specify an initial capacity for the list of safe IP addresses based on the number of resolved addresses
+                // to avoid multiple resizes as safe addresses are added to the list.
+                List<IPAddress> safeResolvedIPAddresses = new(resolvedIpAddresses.Length);
+
+#pragma warning disable S3267 // Loops should be simplified with "LINQ" expressions - avoids delegate allocation on hot path
+                foreach (IPAddress address in resolvedIpAddresses)
+                {
+                    if (!Ssrf.IsUnsafeIpAddress(address, additionalUnsafeNetworks, additionalUnsafeIpAddresses))
+                    {
+                        safeResolvedIPAddresses.Add(address);
+                    }
+                }
+#pragma warning restore S3267
 
                 // If no safe IP addresses remain after filtering, block the connection as all resolved addresses are unsafe.
                 // If some safe addresses remain but others were filtered out as unsafe, the behavior will depend on the value of the failMixedResults flag. 
@@ -937,16 +949,21 @@ public sealed class SsrfSocketsHttpHanderFactory
                 {
                     if (connectionStrategy.HasFlag(ConnectionStrategy.Random))
                     {
-                        safeResolvedIPAddresses = [.. safeResolvedIPAddresses.OrderBy(_ => RandomNumberGenerator.GetInt32(0, safeResolvedIPAddresses.Count))];
+                        // Shuffle in place O(n) in-place vs linq based O(n log n) OrderBy + new list allocation.
+                        for (int i = safeResolvedIPAddresses.Count - 1; i > 0; i--)
+                        {
+                            int j = RandomNumberGenerator.GetInt32(0, i + 1);
+                            (safeResolvedIPAddresses[i], safeResolvedIPAddresses[j]) = (safeResolvedIPAddresses[j], safeResolvedIPAddresses[i]);
+                        }
                     }
 
                     if (connectionStrategy.HasFlag(ConnectionStrategy.Ipv4Preferred))
                     {
-                        safeResolvedIPAddresses = [.. safeResolvedIPAddresses.OrderByDescending(a => a.AddressFamily == AddressFamily.InterNetwork)];
+                        SortIpAddressListByFamily(safeResolvedIPAddresses, AddressFamily.InterNetwork);
                     }
                     else if (connectionStrategy.HasFlag(ConnectionStrategy.Ipv6Preferred))
                     {
-                        safeResolvedIPAddresses = [.. safeResolvedIPAddresses.OrderByDescending(a => a.AddressFamily == AddressFamily.InterNetworkV6)];
+                        SortIpAddressListByFamily(safeResolvedIPAddresses, AddressFamily.InterNetworkV6);
                     }
                 }
 
@@ -994,5 +1011,28 @@ public sealed class SsrfSocketsHttpHanderFactory
         }
 
         return handler;
+    }
+
+    /// <summary>
+    /// Moves all addresses matching <paramref name="preferredFamily"/> to the front of
+    /// the list while preserving relative order within each group.
+    /// </summary>
+    private static void SortIpAddressListByFamily(List<IPAddress> addresses, AddressFamily preferredFamily)
+    {
+        int insertIndex = 0;
+        for (int i = 0; i < addresses.Count; i++)
+        {
+            if (addresses[i].AddressFamily == preferredFamily)
+            {
+                if (i != insertIndex)
+                {
+                    IPAddress preferred = addresses[i];
+                    addresses.RemoveAt(i);
+                    addresses.Insert(insertIndex, preferred);
+                }
+
+                insertIndex++;
+            }
+        }
     }
 }

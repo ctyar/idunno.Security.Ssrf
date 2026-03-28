@@ -3,7 +3,7 @@
     <Product>idunno.Security.Ssrf - Anti Server Side Request Forgery helpers</Product>
     <MaintainerEmail>github.com@idunno.org</MaintainerEmail>
 
-    <RepositoryUrl>https://github.com/blowdart/idunnoSecuritySsrf</RepositoryUrl>
+    <RepositoryUrl>https://github.com/blowdart/idunno.Security.Ssrf</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
 

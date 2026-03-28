@@ -11,6 +11,8 @@ namespace idunno.Security;
 /// </summary>
 public static class Ssrf
 {
+    private static readonly Func<string, CancellationToken, Task<IPHostEntry>> s_defaultHostEntryResolver = Dns.GetHostEntryAsync;
+
     private static readonly IPNetwork[] s_ipv4UnsafeRanges =
         [
             // IPv4 private address ranges https://datatracker.ietf.org/doc/html/rfc1918
@@ -74,7 +76,11 @@ public static class Ssrf
             new (IPAddress.Parse("64:ff9b::"), 96),
 
             // NAT64 local-use prefix https://datatracker.ietf.org/doc/html/rfc8215
-            new (IPAddress.Parse("64:ff9b:1::"), 48)
+            new (IPAddress.Parse("64:ff9b:1::"), 48),
+
+            // IPv6 discard-only prefix https://datatracker.ietf.org/doc/html/rfc6666
+            // while this range silently drops traffic so there is no SSRF risk, bocking it prevents potential connection-hanging probes.
+            new (IPAddress.Parse("100::"), 64)
         ];
 
     /// <summary>
@@ -406,7 +412,7 @@ public static class Ssrf
     {
         ArgumentNullException.ThrowIfNull(uri);
 
-        hostEntryResolver ??= Dns.GetHostEntryAsync;
+        hostEntryResolver ??= s_defaultHostEntryResolver;
 
         if (IsUnsafeUri(uri, allowInsecureProtocols))
         {
@@ -422,26 +428,24 @@ public static class Ssrf
                 additionalUnsafeNetworks: additionalUnsafeNetworks,
                 additionalUnsafeIpAddresses: additionalUnsafeIpAddresses);
         }
-        else
+
+        IPHostEntry? hostEntry = await hostEntryResolver(uri.Host, cancellationToken).ConfigureAwait(false);
+        if (hostEntry is null || hostEntry.AddressList.Length == 0)
         {
-            IPHostEntry? hostEntry = await hostEntryResolver(uri.Host, cancellationToken).ConfigureAwait(false);
-            if (hostEntry is null || hostEntry.AddressList.Length == 0)
+            return true;
+        }
+
+        foreach (IPAddress ipAddress in hostEntry.AddressList)
+        {
+            if (IsUnsafeIpAddress(
+                ipAddress: ipAddress,
+                additionalUnsafeNetworks: additionalUnsafeNetworks,
+                additionalUnsafeIpAddresses: additionalUnsafeIpAddresses))
             {
                 return true;
             }
-
-            foreach (IPAddress ipAddress in hostEntry.AddressList)
-            {
-                if (IsUnsafeIpAddress(
-                    ipAddress: ipAddress,
-                    additionalUnsafeNetworks: additionalUnsafeNetworks,
-                    additionalUnsafeIpAddresses: additionalUnsafeIpAddresses))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
+
+        return false;
     }
 }
