@@ -294,6 +294,19 @@ public class IsUnsafeIpAddressTests
         Assert.True(Ssrf.IsUnsafeIpAddress(IPAddress.Parse(ipAddressAsString)));
     }
 
+    [Theory]
+    [InlineData("64:ff9b::10.0.0.1")]       // NAT64 well-known prefix embedding private IPv4
+    [InlineData("64:ff9b::192.168.1.1")]     // NAT64 well-known prefix embedding private IPv4
+    [InlineData("64:ff9b::127.0.0.1")]       // NAT64 well-known prefix embedding loopback
+    [InlineData("64:ff9b::169.254.169.254")] // NAT64 well-known prefix embedding link-local
+    [InlineData("64:ff9b::8.8.8.8")]         // NAT64 well-known prefix embedding public IPv4
+    [InlineData("64:ff9b:1::10.0.0.1")]      // NAT64 local-use prefix embedding private IPv4
+    [InlineData("64:ff9b:1::8.8.8.8")]       // NAT64 local-use prefix embedding public IPv4
+    public void ReturnsTrueForNat64Addresses(string ipAddressAsString)
+    {
+        Assert.True(Ssrf.IsUnsafeIpAddress(IPAddress.Parse(ipAddressAsString)));
+    }
+
     [Fact]
     public void ThrowsArgumentNullExceptionIfIpAddressIsNull()
     {

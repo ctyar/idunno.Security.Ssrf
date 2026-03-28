@@ -66,7 +66,15 @@ public static class Ssrf
             new (IPAddress.Parse("2001::"), 23),
 
             // Documentation IPv6 addresses https://datatracker.ietf.org/doc/html/rfc3849
-            new (IPAddress.Parse("2001:db8::"), 32)
+            new (IPAddress.Parse("2001:db8::"), 32),
+
+            // NAT64 well-known prefix https://datatracker.ietf.org/doc/html/rfc6052
+            // NAT64 gateways translate these addresses to their embedded IPv4 equivalents,
+            // which could be used to reach private IPv4 infrastructure.
+            new (IPAddress.Parse("64:ff9b::"), 96),
+
+            // NAT64 local-use prefix https://datatracker.ietf.org/doc/html/rfc8215
+            new (IPAddress.Parse("64:ff9b:1::"), 48)
         ];
 
     /// <summary>
@@ -417,7 +425,7 @@ public static class Ssrf
         else
         {
             IPHostEntry? hostEntry = await hostEntryResolver(uri.Host, cancellationToken).ConfigureAwait(false);
-            if (hostEntry is null)
+            if (hostEntry is null || hostEntry.AddressList.Length == 0)
             {
                 return true;
             }
