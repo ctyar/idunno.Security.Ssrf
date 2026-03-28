@@ -259,17 +259,17 @@ public static class Ssrf
     /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns><see langword="true" /> if the <paramref name="uri" /> is considered safe, otherwise <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="uri"/> is <see langword="null"/>.</exception>
-    public static async Task<bool> IsUnsafe(Uri uri, CancellationToken cancellationToken = default)
+    public static Task<bool> IsUnsafe(Uri uri, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(uri);
 
-        return await IsUnsafe(
+        return IsUnsafe(
             uri: uri,
             allowInsecureProtocols: false,
             additionalUnsafeNetworks: null,
             additionalUnsafeIpAddresses: null,
             hostEntryResolver: null,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+            cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -282,17 +282,17 @@ public static class Ssrf
     /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns><see langword="true" /> if the <paramref name="uri" /> is considered safe, otherwise <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="uri"/> is <see langword="null"/>.</exception>
-    public static async Task<bool> IsUnsafe(Uri uri, bool allowInsecureProtocols, CancellationToken cancellationToken = default)
+    public static Task<bool> IsUnsafe(Uri uri, bool allowInsecureProtocols, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(uri);
 
-        return await IsUnsafe(
+        return IsUnsafe(
             uri: uri,
             allowInsecureProtocols: allowInsecureProtocols,
             additionalUnsafeNetworks: null,
             additionalUnsafeIpAddresses: null,
             hostEntryResolver: null,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+            cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -305,18 +305,18 @@ public static class Ssrf
     /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns><see langword="true" /> if the <paramref name="uri" /> is considered safe, otherwise <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="uri"/> or <paramref name="additionalUnsafeNetworks"/> is <see langword="null"/>.</exception>
-    public static async Task<bool> IsUnsafe(Uri uri, ICollection<IPNetwork> additionalUnsafeNetworks, CancellationToken cancellationToken = default)
+    public static Task<bool> IsUnsafe(Uri uri, ICollection<IPNetwork> additionalUnsafeNetworks, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(uri);
         ArgumentNullException.ThrowIfNull(additionalUnsafeNetworks);
 
-        return await IsUnsafe(
+        return IsUnsafe(
             uri: uri,
             allowInsecureProtocols: false,
             additionalUnsafeNetworks: additionalUnsafeNetworks,
             additionalUnsafeIpAddresses: null,
             hostEntryResolver: null,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+            cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -329,18 +329,18 @@ public static class Ssrf
     /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns><see langword="true" /> if the <paramref name="uri" /> is considered safe, otherwise <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="uri"/> or <paramref name="additionalUnsafeIpAddresses"/> is <see langword="null"/>.</exception>
-    public static async Task<bool> IsUnsafe(Uri uri, ICollection<IPAddress> additionalUnsafeIpAddresses, CancellationToken cancellationToken = default)
+    public static Task<bool> IsUnsafe(Uri uri, ICollection<IPAddress> additionalUnsafeIpAddresses, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(uri);
         ArgumentNullException.ThrowIfNull(additionalUnsafeIpAddresses);
 
-        return await IsUnsafe(
+        return IsUnsafe(
             uri: uri,
             allowInsecureProtocols: false,
             additionalUnsafeNetworks: null,
             additionalUnsafeIpAddresses: additionalUnsafeIpAddresses,
             hostEntryResolver: null,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+            cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -354,7 +354,7 @@ public static class Ssrf
     /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns><see langword="true" /> if the <paramref name="uri" /> is considered safe, otherwise <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="uri"/> is <see langword="null"/>.</exception>
-    public static async Task<bool> IsUnsafe(
+    public static Task<bool> IsUnsafe(
         Uri uri,
         ICollection<IPNetwork>? additionalUnsafeNetworks,
         ICollection<IPAddress>? additionalUnsafeIpAddresses,
@@ -362,13 +362,13 @@ public static class Ssrf
     {
         ArgumentNullException.ThrowIfNull(uri);
 
-        return await IsUnsafe(
+        return IsUnsafe(
             uri: uri,
             allowInsecureProtocols: false,
             additionalUnsafeNetworks: additionalUnsafeNetworks,
             additionalUnsafeIpAddresses: additionalUnsafeIpAddresses,
             hostEntryResolver: null,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+            cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -383,7 +383,7 @@ public static class Ssrf
     /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
     /// <returns><see langword="true" /> if the <paramref name="uri" /> is considered safe, otherwise <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="uri"/> is <see langword="null"/>.</exception>
-    public static async Task<bool> IsUnsafe(
+    public static Task<bool> IsUnsafe(
         Uri uri,
         bool allowInsecureProtocols,
         ICollection<IPNetwork>? additionalUnsafeNetworks,
@@ -392,13 +392,13 @@ public static class Ssrf
     {
         ArgumentNullException.ThrowIfNull(uri);
 
-        return await IsUnsafe(
+        return IsUnsafe(
             uri: uri,
             allowInsecureProtocols: allowInsecureProtocols,
             additionalUnsafeNetworks: additionalUnsafeNetworks,
             additionalUnsafeIpAddresses: additionalUnsafeIpAddresses,
             hostEntryResolver: null,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+            cancellationToken: cancellationToken);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S3267:Loops should be simplified with \"LINQ\" expressions", Justification = "Avoids delegate allocation on hot path.")]
