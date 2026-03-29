@@ -6,11 +6,10 @@ A .NET 8, 9 and 10 library to help mitigate Server Side Request Forgery (SSRF) v
 
 [![GitHub License](https://img.shields.io/github/license/blowdart/idunno.Security.Ssrf)](https://github.com/blowdart/idunno.Security.Ssrf/blob/main/LICENSE)
 [![Last Commit](https://img.shields.io/github/last-commit/blowdart/idunno.Security.Ssrf)](https://github.com/blowdart/idunno.Security.Ssrf/commits/main/)
-<!--[![GitHub Tag](https://img.shields.io/github/v/tag/blowdart/idunno.Security.Ssrf)](https://github.com/blowdart/idunno.Security.Ssrf/tags)
+[![GitHub Tag](https://img.shields.io/github/v/tag/blowdart/idunno.Security.Ssrf)](https://github.com/blowdart/idunno.Security.Ssrf/tags)
 [![NuGet Version](https://img.shields.io/nuget/vpre/idunno.Security.Ssrf)](https://www.nuget.org/packages/idunno.Security.Ssrf/)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/idunno.Security.Ssrf)](https://www.nuget.org/packages/idunno.Security.Ssrf/)
 
--->
 ## Getting Started
 
 Add the `idunno.Security.Ssrf` package to your project, and then when you create an `HttpClient`
